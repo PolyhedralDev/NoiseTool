@@ -11,7 +11,7 @@ the noise, including:
 
 # Using the tool
 To use the tool, simply download the latest release, and put it in a folder. Create a file in the same directory
-called `config.yml`, and put a single noise config inside. Example noise config for 4 octaves of Simples:
+called `config.yml`, and put a single noise config inside. Example noise config for 4 octaves of Simplex:
 ```yaml
 dimensions: 2
 type: OpenSimplex2
