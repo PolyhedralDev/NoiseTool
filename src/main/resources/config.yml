@@ -1,0 +1,6 @@
+dimensions: 2
+type: OpenSimplex2
+frequency: 0.01
+fractal:
+  type: FBm
+  octaves: 4

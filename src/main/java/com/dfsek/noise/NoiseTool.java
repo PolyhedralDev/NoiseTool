@@ -5,20 +5,25 @@ import com.dfsek.tectonic.loading.ConfigLoader;
 import com.dfsek.terra.api.math.noise.samplers.NoiseSampler;
 import com.dfsek.terra.config.loaders.config.NoiseBuilderLoader;
 import com.dfsek.terra.generation.config.NoiseBuilder;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class NoiseTool {
-    public static void main(String... args) throws ConfigException, FileNotFoundException {
+    public static void main(String... args) throws ConfigException, IOException {
         JFrame frame = new JFrame("Noise Viewer");
 
         AtomicInteger seed = new AtomicInteger(2403);
@@ -35,20 +40,20 @@ public class NoiseTool {
                 if(e.getKeyChar() == 'r') {
                     try {
                         label.setIcon(new ImageIcon(load(seed.get(), false)));
-                    } catch(ConfigException | FileNotFoundException configException) {
+                    } catch(ConfigException | IOException configException) {
                         configException.printStackTrace();
                     }
                 } else if(e.getKeyChar() == 's') {
                     try {
                         seed.set(ThreadLocalRandom.current().nextInt());
                         label.setIcon(new ImageIcon(load(seed.get(), false)));
-                    } catch(ConfigException | FileNotFoundException configException) {
+                    } catch(ConfigException | IOException configException) {
                         configException.printStackTrace();
                     }
                 } else if(e.getKeyChar() == 'd') {
                     try {
                         label.setIcon(new ImageIcon(load(seed.get(), true)));
-                    } catch(ConfigException | FileNotFoundException configException) {
+                    } catch(ConfigException | IOException configException) {
                         configException.printStackTrace();
                     }
                 }
@@ -76,13 +81,22 @@ public class NoiseTool {
                 + (in << 8)
                 + in;
     }
-    private static BufferedImage load(int seed, boolean distribution) throws ConfigException, FileNotFoundException {
+    private static BufferedImage load(int seed, boolean distribution) throws ConfigException, IOException {
         long s = System.nanoTime();
 
         ConfigLoader loader = new ConfigLoader();
         loader.registerLoader(NoiseBuilder.class, new NoiseBuilderLoader());
         NoiseConfigTemplate template = new NoiseConfigTemplate();
-        loader.load(template, new FileInputStream(new File("config.yml")));
+
+        File file = new File("./config.yml");
+
+        System.out.println(file.getAbsolutePath());
+        if(!file.exists()) {
+            file.getParentFile().mkdirs();
+            FileUtils.copyInputStreamToFile(NoiseTool.class.getResourceAsStream("/config.yml"), file);
+        }
+
+        loader.load(template, new FileInputStream(file));
         NoiseSampler noise = template.getBuilder().build(seed);
 
         int size = 1024;
