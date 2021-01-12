@@ -21,7 +21,7 @@ fractal:
   octaves: 4
 ```
 For more information on noise configs, see the section on the Terra Wiki
-[here](https://github.com/PolyhedralDev/Terra/wiki/pack.yml-Options#noise).
+[here](https://github.com/PolyhedralDev/Terra/wiki/Noise-Options).
 
 Once you have created your configuration, run the tool either from the command line or by double-clicking the JAR.
 When you run the tool, a GUI will open showing a view of the noise, min/max values, the seed, and the time taken to
