@@ -27,3 +27,24 @@ To randomize the seed, press `s`.
 
 ## Plotting distribution
 To plot the distribution of the noise function at the bottom of the window, press `d`.
+
+## Colorizing
+To colorize noise (useful for visualizing the actual distribution of things in probability collections), create
+a file in the same directory as the noise tool called `color.yml`. This file has 2 keys:
+ * `enable` - Whether to pull colors from a probability collection rather than from noise values.
+ * `colors` - A probability collection of colors. They are represented in a raw integer format. You may use
+ hexadecimal color notation by prefixing hex values with `0x`.
+ 
+ Example `color.yml`:
+ ```yaml
+colors:
+  0xff0000: 1
+  0x00ff00: 1
+  0x0000ff: 1
+  0xffffff: 1
+  0x000000: 1
+  0xffff00: 1
+  0x00ffff: 1
+  0xff00ff: 1
+enable: true
+```
