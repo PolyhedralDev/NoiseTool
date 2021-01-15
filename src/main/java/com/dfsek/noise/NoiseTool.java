@@ -107,8 +107,8 @@ public class NoiseTool {
         boolean colors = false;
         ColorConfigTemplate color = new ColorConfigTemplate();
         if(colorFile.exists()) {
-            colors = true;
             loader.load(color, new FileInputStream(colorFile));
+            colors = color.enable();
         }
         ProbabilityCollection<Integer> colorCollection = color.getColors();
 
