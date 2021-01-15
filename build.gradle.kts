@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.dfsek"
-version = "0.1.0"
+version = "0.2.0"
 
 repositories {
     maven { url = uri("https://repo.codemc.org/repository/maven-public") }
@@ -17,6 +17,7 @@ dependencies {
     implementation("com.dfsek.terra.common:common:3.1.0-BETA+1ee2b18")
     implementation("org.yaml:snakeyaml:1.27")
     implementation("commons-io:commons-io:2.8.0")
+    implementation("net.jafama:jafama:2.3.2")
 }
 
 

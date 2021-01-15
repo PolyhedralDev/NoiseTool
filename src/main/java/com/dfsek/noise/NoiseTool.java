@@ -2,22 +2,20 @@ package com.dfsek.noise;
 
 import com.dfsek.tectonic.exception.ConfigException;
 import com.dfsek.tectonic.loading.ConfigLoader;
+import com.dfsek.terra.api.math.ProbabilityCollection;
 import com.dfsek.terra.api.math.noise.samplers.NoiseSampler;
+import com.dfsek.terra.config.loaders.ProbabilityCollectionLoader;
 import com.dfsek.terra.config.loaders.config.NoiseBuilderLoader;
 import com.dfsek.terra.generation.config.NoiseBuilder;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,7 +25,7 @@ public class NoiseTool {
         JFrame frame = new JFrame("Noise Viewer");
 
         AtomicInteger seed = new AtomicInteger(2403);
-        JLabel label = new JLabel(new ImageIcon(load(seed.get(), false)));
+        JLabel label = new JLabel(new ImageIcon(load(seed.get(), false, false)));
         frame.add(label);
         frame.pack();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -39,20 +37,26 @@ public class NoiseTool {
             public void keyTyped(KeyEvent e) {
                 if(e.getKeyChar() == 'r') {
                     try {
-                        label.setIcon(new ImageIcon(load(seed.get(), false)));
+                        label.setIcon(new ImageIcon(load(seed.get(), false, false)));
                     } catch(ConfigException | IOException configException) {
                         configException.printStackTrace();
                     }
                 } else if(e.getKeyChar() == 's') {
                     try {
                         seed.set(ThreadLocalRandom.current().nextInt());
-                        label.setIcon(new ImageIcon(load(seed.get(), false)));
+                        label.setIcon(new ImageIcon(load(seed.get(), false, false)));
                     } catch(ConfigException | IOException configException) {
                         configException.printStackTrace();
                     }
                 } else if(e.getKeyChar() == 'd') {
                     try {
-                        label.setIcon(new ImageIcon(load(seed.get(), true)));
+                        label.setIcon(new ImageIcon(load(seed.get(), true, false)));
+                    } catch(ConfigException | IOException configException) {
+                        configException.printStackTrace();
+                    }
+                } else if(e.getKeyChar() == 'c') {
+                    try {
+                        label.setIcon(new ImageIcon(load(seed.get(), false, true)));
                     } catch(ConfigException | IOException configException) {
                         configException.printStackTrace();
                     }
@@ -81,19 +85,35 @@ public class NoiseTool {
                 + (in << 8)
                 + in;
     }
-    private static BufferedImage load(int seed, boolean distribution) throws ConfigException, IOException {
+    private static BufferedImage load(int seed, boolean distribution, boolean chunk) throws ConfigException, IOException {
         long s = System.nanoTime();
 
         ConfigLoader loader = new ConfigLoader();
-        loader.registerLoader(NoiseBuilder.class, new NoiseBuilderLoader());
+        loader.registerLoader(NoiseBuilder.class, new NoiseBuilderLoader())
+                .registerLoader(ProbabilityCollection.class, new ProbabilityCollectionLoader());
         NoiseConfigTemplate template = new NoiseConfigTemplate();
 
         File file = new File("./config.yml");
+        File colorFile = new File("./color.yml");
+
 
         System.out.println(file.getAbsolutePath());
         if(!file.exists()) {
             file.getParentFile().mkdirs();
             FileUtils.copyInputStreamToFile(NoiseTool.class.getResourceAsStream("/config.yml"), file);
+        }
+
+
+        boolean colors = false;
+        ColorConfigTemplate color = new ColorConfigTemplate();
+        if(colorFile.exists()) {
+            colors = true;
+            loader.load(color, new FileInputStream(colorFile));
+        }
+        ProbabilityCollection<Integer> colorCollection = color.getColors();
+
+        for(int i = 0; i < 10; i++) {
+            System.out.println(colorCollection.get(ThreadLocalRandom.current()));
         }
 
         loader.load(template, new FileInputStream(file));
@@ -104,6 +124,7 @@ public class NoiseTool {
         BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 
         double[][] noiseVals = new double[size][size];
+        int[][] rgbVals = new int[size][size];
         double max = Double.MIN_VALUE;
         double min = Double.MAX_VALUE;
 
@@ -115,12 +136,14 @@ public class NoiseTool {
                 noiseVals[x][z] = n;
                 max = Math.max(n, max);
                 min = Math.min(n, min);
+                if(colors) rgbVals[x][z] = colorCollection.get(noise, x, z);
             }
         }
 
         for(int x = 0; x < noiseVals.length; x++) {
             for(int z = 0; z < noiseVals[x].length; z++) {
-                image.setRGB(x, z, buildRGBA(normal(noiseVals[x][z], 255, min, max)));
+                if(colors) image.setRGB(x, z, rgbVals[x][z] + (255 << 24));
+                else image.setRGB(x, z, buildRGBA(normal(noiseVals[x][z], 255, min, max)));
                 buckets[normal(noiseVals[x][z], size-1, min, max)]++;
             }
         }
@@ -128,6 +151,16 @@ public class NoiseTool {
         long time = System.nanoTime() - s;
 
         double ms = time / 1000000d;
+
+
+        if(chunk) {
+            for(int x = 0; x < image.getWidth(); x += 16) {
+                for(int y = 0; y < image.getHeight(); y++) image.setRGB(x, y, buildRGBA(0));
+            }
+            for(int y = 0; y < image.getWidth(); y += 16) {
+                for(int x = 0; x < image.getHeight(); x++) image.setRGB(x, y, buildRGBA(0));
+            }
+        }
 
         Graphics graphics = image.getGraphics();
         graphics.setColor(Color.WHITE);
