@@ -112,10 +112,6 @@ public class NoiseTool {
         }
         ProbabilityCollection<Integer> colorCollection = color.getColors();
 
-        for(int i = 0; i < 10; i++) {
-            System.out.println(colorCollection.get(ThreadLocalRandom.current()));
-        }
-
         loader.load(template, new FileInputStream(file));
         NoiseSampler noise = template.getBuilder().build(seed);
 
