@@ -3,10 +3,13 @@ package com.dfsek.noise;
 import com.dfsek.tectonic.exception.ConfigException;
 import com.dfsek.tectonic.loading.ConfigLoader;
 import com.dfsek.terra.api.math.ProbabilityCollection;
-import com.dfsek.terra.api.math.noise.samplers.NoiseSampler;
+import com.dfsek.terra.api.math.noise.NoiseSampler;
+import com.dfsek.terra.api.util.seeded.NoiseSeeded;
+import com.dfsek.terra.config.GenericLoaders;
+import com.dfsek.terra.config.fileloaders.FolderLoader;
 import com.dfsek.terra.config.loaders.ProbabilityCollectionLoader;
-import com.dfsek.terra.config.loaders.config.NoiseBuilderLoader;
-import com.dfsek.terra.generation.config.NoiseBuilder;
+import com.dfsek.terra.config.loaders.config.BufferedImageLoader;
+import com.dfsek.terra.config.loaders.config.sampler.NoiseSamplerBuilderLoader;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
@@ -17,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,7 +33,6 @@ public class NoiseTool {
         frame.add(label);
         frame.pack();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
 
 
         frame.addKeyListener(new KeyListener() {
@@ -79,21 +82,31 @@ public class NoiseTool {
         double range = max - min;
         return (int) (((in - min) * out) / range);
     }
+
     private static int buildRGBA(int in) {
         return (255 << 24)
                 + (in << 16)
                 + (in << 8)
                 + in;
     }
+
     private static BufferedImage load(int seed, boolean distribution, boolean chunk) throws ConfigException, IOException {
         long s = System.nanoTime();
 
+        FolderLoader folderLoader = new FolderLoader(Paths.get("./"));
+
         ConfigLoader loader = new ConfigLoader();
-        loader.registerLoader(NoiseBuilder.class, new NoiseBuilderLoader())
+        loader.registerLoader(NoiseSeeded.class, new NoiseSamplerBuilderLoader())
+                .registerLoader(BufferedImage.class, new BufferedImageLoader(folderLoader))
                 .registerLoader(ProbabilityCollection.class, new ProbabilityCollectionLoader());
+
+        new GenericLoaders(null).register(loader);
         NoiseConfigTemplate template = new NoiseConfigTemplate();
 
         File file = new File("./config.yml");
+
+        System.out.println(file.getAbsolutePath());
+
         File colorFile = new File("./color.yml");
 
 
@@ -113,7 +126,8 @@ public class NoiseTool {
         ProbabilityCollection<Integer> colorCollection = color.getColors();
 
         loader.load(template, new FileInputStream(file));
-        NoiseSampler noise = template.getBuilder().build(seed);
+        System.out.println(template.getBuilder().getDimensions());
+        NoiseSampler noise = template.getBuilder().apply((long) seed);
 
         int size = 1024;
 
@@ -140,7 +154,7 @@ public class NoiseTool {
             for(int z = 0; z < noiseVals[x].length; z++) {
                 if(colors) image.setRGB(x, z, rgbVals[x][z] + (255 << 24));
                 else image.setRGB(x, z, buildRGBA(normal(noiseVals[x][z], 255, min, max)));
-                buckets[normal(noiseVals[x][z], size-1, min, max)]++;
+                buckets[normal(noiseVals[x][z], size - 1, min, max)]++;
             }
         }
 
@@ -170,15 +184,15 @@ public class NoiseTool {
 
         if(distribution) {
             graphics.setColor(Color.WHITE);
-            graphics.fillRect(0, size - (size/4) - 1, size, (size/4) - 1);
+            graphics.fillRect(0, size - (size / 4) - 1, size, (size / 4) - 1);
             int highestBucket = Integer.MIN_VALUE;
             for(int i : buckets) highestBucket = Math.max(highestBucket, i);
             graphics.setColor(Color.BLACK);
-            graphics.drawString("" + highestBucket, 0, size - (size/4) - 1 + 20);
+            graphics.drawString("" + highestBucket, 0, size - (size / 4) - 1 + 20);
 
             for(int x = 0; x < size; x++) {
-                for(int y = 0; y < ((double) buckets[x]/highestBucket) * ((double) size/4); y++){
-                    image.setRGB(x, size-y-1, buildRGBA(0));
+                for(int y = 0; y < ((double) buckets[x] / highestBucket) * ((double) size / 4); y++) {
+                    image.setRGB(x, size - y - 1, buildRGBA(0));
                 }
             }
 
@@ -187,3 +201,4 @@ public class NoiseTool {
         return image;
     }
 }
+

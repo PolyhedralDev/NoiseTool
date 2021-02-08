@@ -13,8 +13,8 @@ repositories {
 
 dependencies {
     testCompile("junit", "junit", "4.12")
-    implementation("com.dfsek:Tectonic:1.1.0")
-    implementation("com.dfsek.terra.common:common:3.1.0-BETA+1ee2b18")
+    implementation("com.dfsek:Tectonic:1.2.3")
+    implementation("com.dfsek.terra.common:common:4.0.1-BETA+f8cf61e2")
     implementation("org.yaml:snakeyaml:1.27")
     implementation("commons-io:commons-io:2.8.0")
     implementation("net.jafama:jafama:2.3.2")

@@ -1,4 +1,5 @@
 dimensions: 2
+sampler-type: NOISE
 type: OpenSimplex2
 frequency: 0.01
 fractal:
