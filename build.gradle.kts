@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.dfsek"
-version = "0.4.0"
+version = "0.5.0"
 
 repositories {
     maven { url = uri("https://repo.codemc.org/repository/maven-public") }
@@ -14,8 +14,9 @@ repositories {
 dependencies {
     testCompile("junit", "junit", "4.12")
     implementation("com.dfsek:Tectonic:1.2.3")
-    implementation("com.dfsek.terra.common:common:4.0.1-BETA+f8cf61e2")
+    implementation("com.dfsek.terra.common:common:4.3.0-BETA+6d51da31")
     implementation("org.yaml:snakeyaml:1.27")
+    implementation("com.dfsek:Paralithic:0.3.2")
     implementation("commons-io:commons-io:2.8.0")
     implementation("net.jafama:jafama:2.3.2")
 }

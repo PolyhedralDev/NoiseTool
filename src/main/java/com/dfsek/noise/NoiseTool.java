@@ -10,6 +10,7 @@ import com.dfsek.terra.config.fileloaders.FolderLoader;
 import com.dfsek.terra.config.loaders.ProbabilityCollectionLoader;
 import com.dfsek.terra.config.loaders.config.BufferedImageLoader;
 import com.dfsek.terra.config.loaders.config.sampler.NoiseSamplerBuilderLoader;
+import com.dfsek.terra.registry.config.NoiseRegistry;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
@@ -96,7 +97,7 @@ public class NoiseTool {
         FolderLoader folderLoader = new FolderLoader(Paths.get("./"));
 
         ConfigLoader loader = new ConfigLoader();
-        loader.registerLoader(NoiseSeeded.class, new NoiseSamplerBuilderLoader())
+        loader.registerLoader(NoiseSeeded.class, new NoiseSamplerBuilderLoader(new NoiseRegistry()))
                 .registerLoader(BufferedImage.class, new BufferedImageLoader(folderLoader))
                 .registerLoader(ProbabilityCollection.class, new ProbabilityCollectionLoader());
 
@@ -128,6 +129,7 @@ public class NoiseTool {
         loader.load(template, new FileInputStream(file));
         System.out.println(template.getBuilder().getDimensions());
         NoiseSampler noise = template.getBuilder().apply((long) seed);
+
 
         int size = 1024;
 
@@ -201,4 +203,3 @@ public class NoiseTool {
         return image;
     }
 }
-
