@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.dfsek"
-version = "0.5.0"
+version = "0.5.1"
 
 repositories {
     maven { url = uri("https://repo.codemc.org/repository/maven-public") }
@@ -19,6 +19,7 @@ dependencies {
     implementation("com.dfsek:Paralithic:0.3.2")
     implementation("commons-io:commons-io:2.8.0")
     implementation("net.jafama:jafama:2.3.2")
+    implementation("org.ow2.asm:asm:9.0")
 }
 
 
