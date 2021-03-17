@@ -1,4 +1,4 @@
-package com.dfsek.noise.swing;
+package com.dfsek.noise.swing.actions;
 
 import com.dfsek.terra.api.util.mutable.MutableBoolean;
 

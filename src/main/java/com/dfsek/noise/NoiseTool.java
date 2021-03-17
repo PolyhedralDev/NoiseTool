@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.dfsek.noise.swing.*;
+import com.dfsek.noise.swing.actions.*;
 import com.dfsek.terra.registry.config.NoiseRegistry;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
@@ -41,6 +42,7 @@ public final class NoiseTool extends JFrame implements SearchListener {
     private FindToolBar findToolBar;
     private ReplaceToolBar replaceToolBar;
     private final StatusBar statusBar;
+    private JFileChooser fileChooser = new JFileChooser();
 
     private final NoisePanel noise;
 
@@ -53,7 +55,7 @@ public final class NoiseTool extends JFrame implements SearchListener {
         GridLayout layout = new GridLayout(1, 2);
         setLayout(layout);
 
-        textArea = new RSyntaxTextArea(25, 80);
+        textArea = new RSyntaxTextArea(35, 45);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_YAML);
         textArea.setCodeFoldingEnabled(true);
         textArea.setMarkOccurrences(true);
@@ -163,6 +165,10 @@ public final class NoiseTool extends JFrame implements SearchListener {
 
     }
 
+    public JFileChooser getFileChooser() {
+        return fileChooser;
+    }
+
     private void addItem(Action a, ButtonGroup bg, JMenu menu) {
         JRadioButtonMenuItem item = new JRadioButtonMenuItem(a);
         bg.add(item);
@@ -171,9 +177,17 @@ public final class NoiseTool extends JFrame implements SearchListener {
 
 
     private JMenuBar createMenuBar() {
-
         JMenuBar mb = new JMenuBar();
-        JMenu menu = new JMenu("Search");
+
+        JMenu menu = new JMenu("File");
+
+        menu.add(new OpenFileAction(this));
+        menu.add(new SaveAction(this));
+        menu.add(new SaveAsAction(this));
+
+        mb.add(menu);
+
+        menu = new JMenu("Search");
         menu.add(new JMenuItem(new ShowFindDialogAction(this)));
         menu.add(new JMenuItem(new ShowReplaceDialogAction(this)));
         menu.add(new JMenuItem(new GoToLineAction(this)));
