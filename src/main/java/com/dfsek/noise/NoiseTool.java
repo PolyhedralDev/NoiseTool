@@ -1,205 +1,262 @@
 package com.dfsek.noise;
 
-import com.dfsek.tectonic.exception.ConfigException;
-import com.dfsek.tectonic.loading.ConfigLoader;
-import com.dfsek.terra.api.math.ProbabilityCollection;
-import com.dfsek.terra.api.math.noise.NoiseSampler;
-import com.dfsek.terra.api.util.seeded.NoiseSeeded;
-import com.dfsek.terra.config.GenericLoaders;
-import com.dfsek.terra.config.fileloaders.FolderLoader;
-import com.dfsek.terra.config.loaders.ProbabilityCollectionLoader;
-import com.dfsek.terra.config.loaders.config.BufferedImageLoader;
-import com.dfsek.terra.config.loaders.config.sampler.NoiseSamplerBuilderLoader;
-import com.dfsek.terra.registry.config.NoiseRegistry;
-import org.apache.commons.io.FileUtils;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
+import javax.swing.UIManager.LookAndFeelInfo;
 
-public class NoiseTool {
-    public static void main(String... args) throws ConfigException, IOException {
-        JFrame frame = new JFrame("Noise Viewer");
+import com.dfsek.noise.swing.*;
+import com.formdev.flatlaf.FlatDarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
+import org.apache.commons.io.IOUtils;
+import org.fife.rsta.ui.CollapsibleSectionPanel;
+import org.fife.rsta.ui.search.FindDialog;
+import org.fife.rsta.ui.search.ReplaceDialog;
+import org.fife.rsta.ui.search.ReplaceToolBar;
+import org.fife.rsta.ui.search.SearchEvent;
+import org.fife.rsta.ui.search.SearchListener;
+import org.fife.rsta.ui.search.FindToolBar;
+import org.fife.ui.rsyntaxtextarea.ErrorStrip;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.SearchContext;
+import org.fife.ui.rtextarea.SearchEngine;
+import org.fife.ui.rtextarea.SearchResult;
 
-        AtomicInteger seed = new AtomicInteger(2403);
-        JLabel label = new JLabel(new ImageIcon(load(seed.get(), false, false)));
-        frame.add(label);
-        frame.pack();
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+public final class NoiseTool extends JFrame implements SearchListener {
+
+    private final CollapsibleSectionPanel csp;
+    private final RSyntaxTextArea textArea;
+    private FindDialog findDialog;
+    private ReplaceDialog replaceDialog;
+    private FindToolBar findToolBar;
+    private ReplaceToolBar replaceToolBar;
+    private final StatusBar statusBar;
+
+    private final NoisePanel noise;
 
 
-        frame.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                if(e.getKeyChar() == 'r') {
-                    try {
-                        label.setIcon(new ImageIcon(load(seed.get(), false, false)));
-                    } catch(ConfigException | IOException configException) {
-                        configException.printStackTrace();
-                    }
-                } else if(e.getKeyChar() == 's') {
-                    try {
-                        seed.set(ThreadLocalRandom.current().nextInt());
-                        label.setIcon(new ImageIcon(load(seed.get(), false, false)));
-                    } catch(ConfigException | IOException configException) {
-                        configException.printStackTrace();
-                    }
-                } else if(e.getKeyChar() == 'd') {
-                    try {
-                        label.setIcon(new ImageIcon(load(seed.get(), true, false)));
-                    } catch(ConfigException | IOException configException) {
-                        configException.printStackTrace();
-                    }
-                } else if(e.getKeyChar() == 'c') {
-                    try {
-                        label.setIcon(new ImageIcon(load(seed.get(), false, true)));
-                    } catch(ConfigException | IOException configException) {
-                        configException.printStackTrace();
-                    }
+    private NoiseTool() {
+        initSearchDialogs();
+
+        JPanel contentPane = new JPanel(new BorderLayout());
+
+        GridLayout layout = new GridLayout(1, 2);
+        setLayout(layout);
+
+        textArea = new RSyntaxTextArea(25, 80);
+        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_YAML);
+        textArea.setCodeFoldingEnabled(true);
+        textArea.setMarkOccurrences(true);
+
+
+        this.noise = new NoisePanel(textArea);
+
+        add(contentPane);
+        add(noise);
+
+        csp = new CollapsibleSectionPanel();
+        contentPane.add(csp);
+
+        setJMenuBar(createMenuBar());
+
+
+        try {
+            textArea.setText(IOUtils.toString(NoiseTool.class.getResourceAsStream("/config.yml"), StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        csp.add(sp);
+
+        ErrorStrip errorStrip = new ErrorStrip(textArea);
+        contentPane.add(errorStrip, BorderLayout.LINE_END);
+
+        statusBar = new StatusBar();
+        contentPane.add(statusBar, BorderLayout.SOUTH);
+
+        setTitle("Noise Tool");
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        FlatDarculaLaf.install();
+
+        SwingUtilities.updateComponentTreeUI(NoiseTool.this);
+        if (findDialog!=null) {
+            findDialog.updateUI();
+            replaceDialog.updateUI();
+        }
+        pack();
+
+        pack();
+        setLocationRelativeTo(null);
+
+    }
+
+
+    private void addItem(Action a, ButtonGroup bg, JMenu menu) {
+        JRadioButtonMenuItem item = new JRadioButtonMenuItem(a);
+        bg.add(item);
+        menu.add(item);
+    }
+
+
+    private JMenuBar createMenuBar() {
+
+        JMenuBar mb = new JMenuBar();
+        JMenu menu = new JMenu("Search");
+        menu.add(new JMenuItem(new ShowFindDialogAction(this)));
+        menu.add(new JMenuItem(new ShowReplaceDialogAction(this)));
+        menu.add(new JMenuItem(new GoToLineAction(this)));
+        menu.addSeparator();
+
+        int ctrl = getToolkit().getMenuShortcutKeyMask();
+        int shift = InputEvent.SHIFT_MASK;
+        KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F, ctrl|shift);
+        Action a = csp.addBottomComponent(ks, findToolBar);
+        a.putValue(Action.NAME, "Show Find Search Bar");
+        menu.add(new JMenuItem(a));
+        ks = KeyStroke.getKeyStroke(KeyEvent.VK_H, ctrl|shift);
+        a = csp.addBottomComponent(ks, replaceToolBar);
+        a.putValue(Action.NAME, "Show Replace Search Bar");
+        menu.add(new JMenuItem(a));
+
+        mb.add(menu);
+
+        menu = new JMenu("Theme");
+        ButtonGroup bg = new ButtonGroup();
+        FlatLightLaf.installLafInfo();
+        FlatDarculaLaf.installLafInfo();
+        FlatDarkLaf.installLafInfo();
+        LookAndFeelInfo[] infos = UIManager.getInstalledLookAndFeels();
+        for (LookAndFeelInfo info : infos) {
+            addItem(new LookAndFeelAction(this, info), bg, menu);
+        }
+        mb.add(menu);
+
+        menu = new JMenu("Noise");
+        menu.add(new UpdateNoiseAction(noise));
+        menu.add(new MutableBooleanAction(noise.getChunk(), "Toggle Chunk Borders"));
+        menu.add(new MutableBooleanAction(noise.getDistribution(), "Toggle Distribution Plot"));
+        mb.add(menu);
+
+        return mb;
+
+    }
+
+
+    @Override
+    public String getSelectedText() {
+        return textArea.getSelectedText();
+    }
+
+
+    /**
+     * Creates our Find and Replace dialogs.
+     */
+    private void initSearchDialogs() {
+
+        findDialog = new FindDialog(this, this);
+        replaceDialog = new ReplaceDialog(this, this);
+
+        // This ties the properties of the two dialogs together (match case,
+        // regex, etc.).
+        SearchContext context = findDialog.getSearchContext();
+        replaceDialog.setSearchContext(context);
+
+        // Create tool bars and tie their search contexts together also.
+        findToolBar = new FindToolBar(this);
+        findToolBar.setSearchContext(context);
+        replaceToolBar = new ReplaceToolBar(this);
+        replaceToolBar.setSearchContext(context);
+
+    }
+
+
+    /**
+     * Listens for events from our search dialogs and actually does the dirty
+     * work.
+     */
+    @Override
+    public void searchEvent(SearchEvent e) {
+
+        SearchEvent.Type type = e.getType();
+        SearchContext context = e.getSearchContext();
+        SearchResult result;
+
+        switch (type) {
+            default: // Prevent FindBugs warning later
+            case MARK_ALL:
+                result = SearchEngine.markAll(textArea, context);
+                break;
+            case FIND:
+                result = SearchEngine.find(textArea, context);
+                if (!result.wasFound() || result.isWrapped()) {
+                    UIManager.getLookAndFeel().provideErrorFeedback(textArea);
                 }
-            }
+                break;
+            case REPLACE:
+                result = SearchEngine.replace(textArea, context);
+                if (!result.wasFound() || result.isWrapped()) {
+                    UIManager.getLookAndFeel().provideErrorFeedback(textArea);
+                }
+                break;
+            case REPLACE_ALL:
+                result = SearchEngine.replaceAll(textArea, context);
+                JOptionPane.showMessageDialog(null, result.getCount() +
+                        " occurrences replaced.");
+                break;
+        }
 
-            @Override
-            public void keyPressed(KeyEvent e) {
+        String text;
+        if (result.wasFound()) {
+            text = "Text found; occurrences marked: " + result.getMarkedCount();
+        }
+        else if (type==SearchEvent.Type.MARK_ALL) {
+            if (result.getMarkedCount()>0) {
+                text = "Occurrences marked: " + result.getMarkedCount();
             }
+            else {
+                text = "";
+            }
+        }
+        else {
+            text = "Text not found";
+        }
+        statusBar.setLabel(text);
 
-            @Override
-            public void keyReleased(KeyEvent e) {
+    }
+
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//					UIManager.setLookAndFeel("org.pushingpixels.substance.api.skin.SubstanceGraphiteAquaLookAndFeel");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            new NoiseTool().setVisible(true);
         });
-
-        frame.setVisible(true);
     }
 
-    private static int normal(double in, double out, double min, double max) {
-        double range = max - min;
-        return (int) (((in - min) * out) / range);
+    public ReplaceDialog getReplaceDialog() {
+        return replaceDialog;
     }
 
-    private static int buildRGBA(int in) {
-        return (255 << 24)
-                + (in << 16)
-                + (in << 8)
-                + in;
+    public FindDialog getFindDialog() {
+        return findDialog;
     }
 
-    private static BufferedImage load(int seed, boolean distribution, boolean chunk) throws ConfigException, IOException {
-        long s = System.nanoTime();
-
-        FolderLoader folderLoader = new FolderLoader(Paths.get("./"));
-
-        ConfigLoader loader = new ConfigLoader();
-        loader.registerLoader(NoiseSeeded.class, new NoiseSamplerBuilderLoader(new NoiseRegistry()))
-                .registerLoader(BufferedImage.class, new BufferedImageLoader(folderLoader))
-                .registerLoader(ProbabilityCollection.class, new ProbabilityCollectionLoader());
-
-        new GenericLoaders(null).register(loader);
-        NoiseConfigTemplate template = new NoiseConfigTemplate();
-
-        File file = new File("./config.yml");
-
-        System.out.println(file.getAbsolutePath());
-
-        File colorFile = new File("./color.yml");
-
-
-        System.out.println(file.getAbsolutePath());
-        if(!file.exists()) {
-            file.getParentFile().mkdirs();
-            FileUtils.copyInputStreamToFile(NoiseTool.class.getResourceAsStream("/config.yml"), file);
-        }
-
-
-        boolean colors = false;
-        ColorConfigTemplate color = new ColorConfigTemplate();
-        if(colorFile.exists()) {
-            loader.load(color, new FileInputStream(colorFile));
-            colors = color.enable();
-        }
-        ProbabilityCollection<Integer> colorCollection = color.getColors();
-
-        loader.load(template, new FileInputStream(file));
-        System.out.println(template.getBuilder().getDimensions());
-        NoiseSampler noise = template.getBuilder().apply((long) seed);
-
-
-        int size = 1024;
-
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-
-        double[][] noiseVals = new double[size][size];
-        int[][] rgbVals = new int[size][size];
-        double max = Double.MIN_VALUE;
-        double min = Double.MAX_VALUE;
-
-        int[] buckets = new int[1024];
-
-        for(int x = 0; x < noiseVals.length; x++) {
-            for(int z = 0; z < noiseVals[x].length; z++) {
-                double n = noise.getNoise(x, z);
-                noiseVals[x][z] = n;
-                max = Math.max(n, max);
-                min = Math.min(n, min);
-                if(colors) rgbVals[x][z] = colorCollection.get(noise, x, z);
-            }
-        }
-
-        for(int x = 0; x < noiseVals.length; x++) {
-            for(int z = 0; z < noiseVals[x].length; z++) {
-                if(colors) image.setRGB(x, z, rgbVals[x][z] + (255 << 24));
-                else image.setRGB(x, z, buildRGBA(normal(noiseVals[x][z], 255, min, max)));
-                buckets[normal(noiseVals[x][z], size - 1, min, max)]++;
-            }
-        }
-
-        long time = System.nanoTime() - s;
-
-        double ms = time / 1000000d;
-
-
-        if(chunk) {
-            for(int x = 0; x < image.getWidth(); x += 16) {
-                for(int y = 0; y < image.getHeight(); y++) image.setRGB(x, y, buildRGBA(0));
-            }
-            for(int y = 0; y < image.getWidth(); y += 16) {
-                for(int x = 0; x < image.getHeight(); x++) image.setRGB(x, y, buildRGBA(0));
-            }
-        }
-
-        Graphics graphics = image.getGraphics();
-        graphics.setColor(Color.WHITE);
-        graphics.fillRect(0, 0, 325, 90);
-        graphics.setColor(Color.BLACK);
-        graphics.setFont(new Font("Monospace", Font.BOLD, 20));
-        graphics.drawString("min: " + min, 0, 20);
-        graphics.drawString("max: " + max, 0, 40);
-        graphics.drawString("seed: " + seed, 0, 60);
-        graphics.drawString("time: " + ms + "ms", 0, 80);
-
-        if(distribution) {
-            graphics.setColor(Color.WHITE);
-            graphics.fillRect(0, size - (size / 4) - 1, size, (size / 4) - 1);
-            int highestBucket = Integer.MIN_VALUE;
-            for(int i : buckets) highestBucket = Math.max(highestBucket, i);
-            graphics.setColor(Color.BLACK);
-            graphics.drawString("" + highestBucket, 0, size - (size / 4) - 1 + 20);
-
-            for(int x = 0; x < size; x++) {
-                for(int y = 0; y < ((double) buckets[x] / highestBucket) * ((double) size / 4); y++) {
-                    image.setRGB(x, size - y - 1, buildRGBA(0));
-                }
-            }
-
-        }
-
-        return image;
+    public RSyntaxTextArea getTextArea() {
+        return textArea;
     }
+
+
 }

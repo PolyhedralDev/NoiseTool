@@ -20,6 +20,12 @@ dependencies {
     implementation("commons-io:commons-io:2.8.0")
     implementation("net.jafama:jafama:2.3.2")
     implementation("org.ow2.asm:asm:9.0")
+
+    implementation("com.fifesoft:rstaui:3.1.1")
+    implementation("com.fifesoft:rsyntaxtextarea:3.1.2")
+
+
+    implementation("com.formdev:flatlaf:1.0")
 }
 
 
