@@ -28,11 +28,14 @@ import java.nio.file.Paths;
 public class NoisePanel extends JPanel {
     private final RSyntaxTextArea textArea;
     private final JLabel image;
+    private final JTextArea statisticsPanel;
+    private final NoiseDistributionPanel distributionPanel;
     private MutableBoolean chunk = new MutableBoolean();
-    private MutableBoolean distribution = new MutableBoolean();
 
-    public NoisePanel(RSyntaxTextArea textArea) {
+    public NoisePanel(RSyntaxTextArea textArea, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel) {
         this.textArea = textArea;
+        this.statisticsPanel = statisticsPanel;
+        this.distributionPanel = distributionPanel;
         this.image = new JLabel();
         add(image);
     }
@@ -43,15 +46,13 @@ public class NoisePanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
             image.setIcon(new TextIcon(this, "An error occurred. "));
+            statisticsPanel.setText("An error occurred.");
+            distributionPanel.error();
         }
     }
 
     public MutableBoolean getChunk() {
         return chunk;
-    }
-
-    public MutableBoolean getDistribution() {
-        return distribution;
     }
 
     private BufferedImage getImage(long seed) throws ConfigException, FileNotFoundException {
@@ -120,9 +121,6 @@ public class NoisePanel extends JPanel {
             }
         }
 
-
-
-
         if(chunk.get()) {
             for(int x = 0; x < FastMath.floorDiv(image.getWidth(), 16); x++) {
                 for(int y = 0; y < image.getHeight(); y++) image.setRGB(x*16, y, buildRGBA(0));
@@ -132,31 +130,8 @@ public class NoisePanel extends JPanel {
             }
         }
 
-        Graphics graphics = image.getGraphics();
-        graphics.setColor(Color.WHITE);
-        graphics.fillRect(0, 0, 325, 90);
-        graphics.setColor(Color.BLACK);
-        graphics.setFont(new Font("Monospace", Font.BOLD, 20));
-        graphics.drawString("min: " + min, 0, 20);
-        graphics.drawString("max: " + max, 0, 40);
-        graphics.drawString("seed: " + seed, 0, 60);
-        graphics.drawString("time: " + ms + "ms", 0, 80);
-
-        if(distribution.get()) {
-            graphics.setColor(Color.WHITE);
-            graphics.fillRect(0, sizeY - (sizeY / 4) - 1, sizeX, (sizeY / 4) - 1);
-            int highestBucket = Integer.MIN_VALUE;
-            for(int i : buckets) highestBucket = Math.max(highestBucket, i);
-            graphics.setColor(Color.BLACK);
-            graphics.drawString("" + highestBucket, 0, sizeY - (sizeY / 4) - 1 + 20);
-
-            for(int x = 0; x < sizeX; x++) {
-                for(int y = 0; y < ((double) buckets[x] / highestBucket) * ((double) sizeY / 4); y++) {
-                    image.setRGB(x, sizeY - y - 1, buildRGBA(0));
-                }
-            }
-
-        }
+        statisticsPanel.setText("min: " + min + "\nmax: " + max + "\nseed: " + seed + "\ntime: " + ms + "ms");
+        distributionPanel.update(buckets);
 
         System.out.println("Rendered " + sizeX*sizeY + " points in " + ms + "ms.");
 

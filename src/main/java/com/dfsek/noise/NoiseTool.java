@@ -70,13 +70,22 @@ public final class NoiseTool extends JFrame implements SearchListener {
         ac.setAutoCompleteSingleChoices(false);
         ac.setAutoActivationDelay(200);
 
+        JTextArea statisticsPanel = new JTextArea();
+        statisticsPanel.setEditable(false);
 
-        this.noise = new NoisePanel(textArea);
+        NoiseDistributionPanel distributionPanel = new NoiseDistributionPanel();
+
+        this.noise = new NoisePanel(textArea, statisticsPanel, distributionPanel);
 
         JTabbedPane pane = new JTabbedPane();
         pane.addTab("Render", noise);
 
+        pane.addTab("Statistics", statisticsPanel);
+
+        pane.addTab("Distribution", distributionPanel);
+
         JTextArea sysout = new JTextArea();
+        sysout.setEditable(false);
 
         System.setOut(new PrintStream(new TextAreaOutputStream(sysout)));
         System.setErr(new PrintStream(new TextAreaOutputStream(sysout)));
@@ -197,7 +206,6 @@ public final class NoiseTool extends JFrame implements SearchListener {
         menu = new JMenu("Noise");
         menu.add(new UpdateNoiseAction(noise));
         menu.add(new MutableBooleanAction(noise.getChunk(), "Toggle Chunk Borders"));
-        menu.add(new MutableBooleanAction(noise.getDistribution(), "Toggle Distribution Plot"));
         mb.add(menu);
 
         return mb;
@@ -292,7 +300,6 @@ public final class NoiseTool extends JFrame implements SearchListener {
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//					UIManager.setLookAndFeel("org.pushingpixels.substance.api.skin.SubstanceGraphiteAquaLookAndFeel");
             } catch (Exception e) {
                 e.printStackTrace();
             }
