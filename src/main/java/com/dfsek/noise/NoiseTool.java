@@ -218,6 +218,9 @@ public final class NoiseTool extends JFrame implements SearchListener {
         return textArea.getSelectedText();
     }
 
+    public NoisePanel getNoise() {
+        return noise;
+    }
 
     /**
      * Creates our Find and Replace dialogs.

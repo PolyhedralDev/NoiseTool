@@ -27,6 +27,7 @@ public class LookAndFeelAction extends AbstractAction {
             if (noiseTool.getFindDialog() != null) {
                 noiseTool.getFindDialog().updateUI();
                 noiseTool.getReplaceDialog().updateUI();
+                noiseTool.getNoise().update();
             }
             noiseTool.pack();
         } catch (RuntimeException re) {
