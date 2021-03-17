@@ -3,6 +3,7 @@ package com.dfsek.noise;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 import javax.swing.*;
@@ -70,11 +71,24 @@ public final class NoiseTool extends JFrame implements SearchListener {
         ac.setAutoActivationDelay(200);
 
 
-
         this.noise = new NoisePanel(textArea);
 
+        JTabbedPane pane = new JTabbedPane();
+        pane.addTab("Render", noise);
+
+        JTextArea sysout = new JTextArea();
+
+        System.setOut(new PrintStream(new TextAreaOutputStream(sysout)));
+        System.setErr(new PrintStream(new TextAreaOutputStream(sysout)));
+
+        pane.addTab("Console", new JScrollPane(sysout));
+
+        pane.setSelectedIndex(0);
+
+        pane.setBorder(BorderFactory.createEmptyBorder(0,0,20,10));
+
         add(contentPane);
-        add(noise);
+        add(pane);
 
         csp = new CollapsibleSectionPanel();
         contentPane.add(csp);

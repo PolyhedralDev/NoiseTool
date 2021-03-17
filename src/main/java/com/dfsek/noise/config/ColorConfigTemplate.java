@@ -1,4 +1,4 @@
-package com.dfsek.noise;
+package com.dfsek.noise.config;
 
 import com.dfsek.tectonic.annotations.Default;
 import com.dfsek.tectonic.annotations.Value;

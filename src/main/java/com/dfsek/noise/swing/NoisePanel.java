@@ -1,7 +1,7 @@
 package com.dfsek.noise.swing;
 
-import com.dfsek.noise.ColorConfigTemplate;
-import com.dfsek.noise.NoiseConfigTemplate;
+import com.dfsek.noise.config.ColorConfigTemplate;
+import com.dfsek.noise.config.NoiseConfigTemplate;
 import com.dfsek.tectonic.exception.ConfigException;
 import com.dfsek.tectonic.loading.ConfigLoader;
 import com.dfsek.terra.api.math.noise.NoiseSampler;
@@ -40,8 +40,9 @@ public class NoisePanel extends JPanel {
     public void update() {
         try {
             image.setIcon(new ImageIcon(getImage(2403)));
-        } catch (ConfigException | FileNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            image.setIcon(new TextIcon(this, "An error occurred. "));
         }
     }
 
@@ -54,7 +55,8 @@ public class NoisePanel extends JPanel {
     }
 
     private BufferedImage getImage(long seed) throws ConfigException, FileNotFoundException {
-        long s = System.nanoTime();
+
+        System.out.println("Rendering noise with seed " + seed);
 
         FolderLoader folderLoader = new FolderLoader(Paths.get("./"));
 
@@ -65,10 +67,6 @@ public class NoisePanel extends JPanel {
 
         new GenericLoaders(null).register(loader);
         NoiseConfigTemplate template = new NoiseConfigTemplate();
-
-        File file = new File("./config.yml");
-
-        System.out.println(file.getAbsolutePath());
 
         File colorFile = new File("./color.yml");
 
@@ -82,7 +80,7 @@ public class NoisePanel extends JPanel {
         ProbabilityCollection<Integer> colorCollection = color.getColors();
 
         loader.load(template, textArea.getText());
-        System.out.println(template.getBuilder().getDimensions());
+        System.out.println(template.getBuilder().getDimensions() + " Dimensions.");
         NoiseSampler noise = template.getBuilder().apply((long) seed);
 
 
@@ -96,7 +94,9 @@ public class NoisePanel extends JPanel {
         double max = Double.MIN_VALUE;
         double min = Double.MAX_VALUE;
 
-        int[] buckets = new int[1024];
+        int[] buckets = new int[sizeX];
+
+        long s = System.nanoTime();
 
         for(int x = 0; x < noiseVals.length; x++) {
             for(int z = 0; z < noiseVals[x].length; z++) {
@@ -108,6 +108,10 @@ public class NoisePanel extends JPanel {
             }
         }
 
+        long time = System.nanoTime() - s;
+
+        double ms = time / 1000000d;
+
         for(int x = 0; x < noiseVals.length; x++) {
             for(int z = 0; z < noiseVals[x].length; z++) {
                 if(colors) image.setRGB(x, z, rgbVals[x][z] + (255 << 24));
@@ -116,9 +120,7 @@ public class NoisePanel extends JPanel {
             }
         }
 
-        long time = System.nanoTime() - s;
 
-        double ms = time / 1000000d;
 
 
         if(chunk.get()) {
@@ -155,6 +157,8 @@ public class NoisePanel extends JPanel {
             }
 
         }
+
+        System.out.println("Rendered " + sizeX*sizeY + " points in " + ms + "ms.");
 
         return image;
     }
