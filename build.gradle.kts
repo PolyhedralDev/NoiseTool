@@ -14,7 +14,7 @@ repositories {
 dependencies {
     testCompile("junit", "junit", "4.12")
     implementation("com.dfsek:Tectonic:1.2.3")
-    implementation("com.dfsek.terra.common:common:4.3.0-BETA+6d51da31")
+    implementation("com.dfsek.terra.common:common:5.0.0-BETA+7f11373f")
     implementation("org.yaml:snakeyaml:1.27")
     implementation("com.dfsek:Paralithic:0.3.2")
     implementation("commons-io:commons-io:2.8.0")
@@ -23,6 +23,7 @@ dependencies {
 
     implementation("com.fifesoft:rstaui:3.1.1")
     implementation("com.fifesoft:rsyntaxtextarea:3.1.2")
+    implementation("com.fifesoft:autocomplete:3.1.1")
 
 
     implementation("com.formdev:flatlaf:1.0")

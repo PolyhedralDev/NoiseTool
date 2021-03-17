@@ -9,6 +9,7 @@ import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import com.dfsek.noise.swing.*;
+import com.dfsek.terra.registry.config.NoiseRegistry;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -20,6 +21,7 @@ import org.fife.rsta.ui.search.ReplaceToolBar;
 import org.fife.rsta.ui.search.SearchEvent;
 import org.fife.rsta.ui.search.SearchListener;
 import org.fife.rsta.ui.search.FindToolBar;
+import org.fife.ui.autocomplete.*;
 import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -54,6 +56,19 @@ public final class NoiseTool extends JFrame implements SearchListener {
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_YAML);
         textArea.setCodeFoldingEnabled(true);
         textArea.setMarkOccurrences(true);
+        textArea.setTabsEmulated(true);
+        textArea.setTabSize(2);
+
+        CompletionProvider provider = createCompletionProvider(new NoiseRegistry()); //new LanguageAwareCompletionProvider(new DefaultCompletionProvider());
+
+        AutoCompletion ac = new AutoCompletion(provider);
+        ac.install(textArea);
+        ac.setShowDescWindow(true);
+        ac.setAutoCompleteEnabled(true);
+        ac.setAutoActivationEnabled(true);
+        ac.setAutoCompleteSingleChoices(false);
+        ac.setAutoActivationDelay(200);
+
 
 
         this.noise = new NoisePanel(textArea);
@@ -67,11 +82,14 @@ public final class NoiseTool extends JFrame implements SearchListener {
         setJMenuBar(createMenuBar());
 
 
+
+
         try {
             textArea.setText(IOUtils.toString(NoiseTool.class.getResourceAsStream("/config.yml"), StandardCharsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
         RTextScrollPane sp = new RTextScrollPane(textArea);
         csp.add(sp);
@@ -97,8 +115,30 @@ public final class NoiseTool extends JFrame implements SearchListener {
         pack();
         setLocationRelativeTo(null);
 
+        noise.update();
     }
 
+    private CompletionProvider createCompletionProvider(NoiseRegistry registry) {
+        DefaultCompletionProvider noiseTypeProvider = new DefaultCompletionProvider();
+        noiseTypeProvider.setAutoActivationRules(true, null);
+
+        registry.keys().forEach(key -> noiseTypeProvider.addCompletion(new BasicCompletion(noiseTypeProvider, key, null, key + " noise type")));
+
+        DefaultCompletionProvider basicProvider = new DefaultCompletionProvider();
+        basicProvider.setAutoActivationRules(true, null);
+
+        registry.keys().forEach(key -> basicProvider.addCompletion(new BasicCompletion(basicProvider, key, null, key + " noise type")));
+        basicProvider.addCompletion(new BasicCompletion(basicProvider, "type", null, "Sets the noise type for this sampler."));
+        basicProvider.addCompletion(new BasicCompletion(basicProvider, "frequency", null, "Sets the frequency for this sampler."));
+
+        LanguageAwareCompletionProvider provider = new LanguageAwareCompletionProvider(basicProvider);
+        basicProvider.setAutoActivationRules(true, null);
+
+        provider.setStringCompletionProvider(noiseTypeProvider);
+
+        return provider;
+
+    }
 
     private void addItem(Action a, ButtonGroup bg, JMenu menu) {
         JRadioButtonMenuItem item = new JRadioButtonMenuItem(a);
