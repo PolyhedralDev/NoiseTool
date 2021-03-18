@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.dfsek"
-version = "0.5.1"
+version = "1.0.0"
 
 repositories {
     maven { url = uri("https://repo.codemc.org/repository/maven-public") }
