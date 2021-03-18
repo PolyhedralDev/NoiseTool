@@ -208,9 +208,18 @@ public final class NoiseTool extends JFrame implements SearchListener {
 
         JMenu menu = new JMenu("File");
 
-        menu.add(new OpenFileAction(this));
-        menu.add(new SaveAction(this));
-        menu.add(new SaveAsAction(this));
+        Action open = new OpenFileAction(this);
+        Action save = new SaveAction(this);
+        Action saveAs = new SaveAsAction(this);
+
+        open.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_MASK));
+        save.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK));
+        saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK));
+
+        menu.add(open);
+        menu.add(save);
+        menu.add(saveAs);
+
 
         mb.add(menu);
 
@@ -245,7 +254,11 @@ public final class NoiseTool extends JFrame implements SearchListener {
         mb.add(menu);
 
         menu = new JMenu("Noise");
-        menu.add(new UpdateNoiseAction(noise));
+
+        Action up = new UpdateNoiseAction(noise);
+
+        up.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+        menu.add(up);
         menu.add(new MutableBooleanAction(noise.getChunk(), "Toggle Chunk Borders"));
         mb.add(menu);
 
