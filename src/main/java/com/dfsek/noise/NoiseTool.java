@@ -42,7 +42,8 @@ public final class NoiseTool extends JFrame implements SearchListener {
     private FindToolBar findToolBar;
     private ReplaceToolBar replaceToolBar;
     private final StatusBar statusBar;
-    private JFileChooser fileChooser = new JFileChooser();
+    private final JFileChooser fileChooser = new JFileChooser();
+    private final JFileChooser imageChooser = new JFileChooser();
 
     private final NoisePanel noise;
 
@@ -77,10 +78,14 @@ public final class NoiseTool extends JFrame implements SearchListener {
 
         NoiseDistributionPanel distributionPanel = new NoiseDistributionPanel();
 
-        this.noise = new NoisePanel(textArea, statisticsPanel, distributionPanel);
+        NoiseSettingsPanel settingsPanel = new NoiseSettingsPanel();
+
+        this.noise = new NoisePanel(textArea, statisticsPanel, distributionPanel, settingsPanel);
 
         JTabbedPane pane = new JTabbedPane();
         pane.addTab("Render", noise);
+
+        pane.addTab("Settings", settingsPanel);
 
         pane.addTab("Statistics", statisticsPanel);
 
@@ -337,4 +342,7 @@ public final class NoiseTool extends JFrame implements SearchListener {
     }
 
 
+    public JFileChooser getImageChooser() {
+        return imageChooser;
+    }
 }
