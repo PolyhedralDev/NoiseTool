@@ -158,6 +158,7 @@ public final class NoiseTool extends JFrame implements SearchListener {
         pack();
         setLocationRelativeTo(null);
 
+        noise.reload();
         noise.update();
     }
 

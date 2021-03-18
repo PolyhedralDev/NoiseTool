@@ -15,6 +15,7 @@ public class UpdateNoiseAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
+        noisePanel.reload();
         noisePanel.update();
     }
 }

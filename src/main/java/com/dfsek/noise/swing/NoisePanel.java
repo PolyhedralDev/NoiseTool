@@ -39,8 +39,13 @@ public class NoisePanel extends JPanel {
     private final MutableBoolean chunk = new MutableBoolean();
 
     private final NoiseSettingsPanel settingsPanel;
-
+    private final MutableBoolean error;
+    private final MutableBoolean moved;
     private BufferedImage render;
+
+    private NoiseSeeded noiseSeeded;
+    private ProbabilityCollection<Integer> colorCollection;
+    private final MutableBoolean color = new MutableBoolean();
 
     public NoisePanel(RSyntaxTextArea textArea, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel, final NoiseSettingsPanel settingsPanel) {
         this.textArea = textArea;
@@ -48,6 +53,10 @@ public class NoisePanel extends JPanel {
         this.distributionPanel = distributionPanel;
         this.settingsPanel = settingsPanel;
         this.image = new JLabel();
+        this.error = new MutableBoolean();
+        this.moved = new MutableBoolean();
+        this.moved.set(false);
+        error.set(false);
         add(new JPanel() {
             private volatile int screenX;
 
@@ -63,25 +72,31 @@ public class NoisePanel extends JPanel {
 
                     @Override
                     public void mouseClicked(MouseEvent e) {
+                        System.nanoTime();
                     }
 
                     @Override
                     public void mousePressed(MouseEvent e) {
-                        screenX = e.getXOnScreen();
-                        screenY = e.getYOnScreen();
+                        if(!error.get()) {
+                            screenX = e.getXOnScreen();
+                            screenY = e.getYOnScreen();
 
-                        myX = getX();
-                        myY = getY();
+                            myX = getX();
+                            myY = getY();
+                        }
                     }
 
                     @Override
                     public void mouseReleased(MouseEvent e) {
-                        int deltaX = e.getXOnScreen() - screenX;
-                        int deltaY = e.getYOnScreen() - screenY;
+                        if(!error.get() && moved.get()) {
+                            moved.set(false);
+                            int deltaX = e.getXOnScreen() - screenX;
+                            int deltaY = e.getYOnScreen() - screenY;
 
-                        settingsPanel.setOriginX(settingsPanel.getOriginX() - (myX + deltaX));
-                        settingsPanel.setOriginZ(settingsPanel.getOriginZ() - (myY + deltaY));
-                        NoisePanel.this.update();
+                            settingsPanel.setOriginX(settingsPanel.getOriginX() - deltaX);
+                            settingsPanel.setOriginZ(settingsPanel.getOriginZ() - deltaY);
+                            NoisePanel.this.update();
+                        }
                     }
 
                     @Override
@@ -97,10 +112,13 @@ public class NoisePanel extends JPanel {
 
                     @Override
                     public void mouseDragged(MouseEvent e) {
-                        int deltaX = e.getXOnScreen() - screenX;
-                        int deltaY = e.getYOnScreen() - screenY;
+                        if(!error.get()) {
+                            moved.set(true);
+                            int deltaX = e.getXOnScreen() - screenX;
+                            int deltaY = e.getYOnScreen() - screenY;
 
-                        setLocation(myX + deltaX, myY + deltaY);
+                            setLocation(myX + deltaX, myY + deltaY);
+                        }
                     }
 
                     @Override
@@ -122,9 +140,42 @@ public class NoisePanel extends JPanel {
     }
 
     public void update() {
+        if(this.error.get()) return;
+        this.error.set(true);
         try {
             this.render = getImage(this.settingsPanel.getSeed());
             this.image.setIcon(new ImageIcon(this.render));
+            this.error.set(false);
+        } catch(Exception e) {
+            e.printStackTrace();
+            this.image.setIcon(new TextIcon(this, "An error occurred. "));
+            this.statisticsPanel.setText("An error occurred.");
+            this.distributionPanel.error();
+        }
+    }
+
+    public void reload() {
+        this.error.set(true);
+        try {
+            FolderLoader folderLoader = new FolderLoader(Paths.get("./"));
+            ConfigLoader loader = new ConfigLoader();
+            loader.registerLoader(NoiseSeeded.class, new NoiseSamplerBuilderLoader(new NoiseRegistry()))
+                    .registerLoader(BufferedImage.class, new BufferedImageLoader(folderLoader))
+                    .registerLoader(ProbabilityCollection.class, new ProbabilityCollectionLoader());
+            new GenericLoaders(null).register(loader);
+            NoiseConfigTemplate template = new NoiseConfigTemplate();
+            File colorFile = new File("./color.yml");
+
+            ColorConfigTemplate colorConfigTemplate = new ColorConfigTemplate();
+            if(colorFile.exists()) {
+                loader.load(colorConfigTemplate, new FileInputStream(colorFile));
+                color.set(colorConfigTemplate.enable());
+            }
+            this.colorCollection = colorConfigTemplate.getColors();
+            loader.load(template, this.textArea.getText());
+            System.out.println(template.getBuilder().getDimensions() + " Dimensions.");
+            this.noiseSeeded = template.getBuilder();
+            this.error.set(false);
         } catch(Exception e) {
             e.printStackTrace();
             this.image.setIcon(new TextIcon(this, "An error occurred. "));
@@ -141,77 +192,66 @@ public class NoisePanel extends JPanel {
         return this.chunk;
     }
 
-    private BufferedImage getImage(long seed) throws ConfigException, FileNotFoundException {
+    private BufferedImage getImage(long seed) {
         System.out.println("Rendering noise with seed " + seed);
-        FolderLoader folderLoader = new FolderLoader(Paths.get("./"));
-        ConfigLoader loader = new ConfigLoader();
-        loader.registerLoader(NoiseSeeded.class, new NoiseSamplerBuilderLoader(new NoiseRegistry()))
-                .registerLoader(BufferedImage.class, new BufferedImageLoader(folderLoader))
-                .registerLoader(ProbabilityCollection.class, new ProbabilityCollectionLoader());
-        (new GenericLoaders(null)).register(loader);
-        NoiseConfigTemplate template = new NoiseConfigTemplate();
-        File colorFile = new File("./color.yml");
-        boolean colors = false;
-        ColorConfigTemplate color = new ColorConfigTemplate();
-        if(colorFile.exists()) {
-            loader.load(color, new FileInputStream(colorFile));
-            colors = color.enable();
-        }
-        ProbabilityCollection<Integer> colorCollection = color.getColors();
-        loader.load(template, this.textArea.getText());
-        System.out.println(template.getBuilder().getDimensions() + " Dimensions.");
-        NoiseSampler noise = template.getBuilder().apply(seed);
+
+        NoiseSampler noise = noiseSeeded.apply(seed);
         int sizeX = getWidth();
         int sizeY = getHeight();
         double originX = this.settingsPanel.getOriginX();
         double originZ = this.settingsPanel.getOriginZ();
-        BufferedImage image = new BufferedImage(sizeX, sizeY, 2);
+        BufferedImage image = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_ARGB);
         double[][] noiseVals = new double[sizeX][sizeY];
-        int[][] rgbVals = new int[sizeX][sizeY];
-        double max = Double.MIN_VALUE;
-        double min = Double.MAX_VALUE;
-        int[] buckets = new int[sizeX];
-        long s = System.nanoTime();
+
+
+
+        long startTime = System.nanoTime();
         for(int x = 0; x < noiseVals.length; x++) {
             for(int z = 0; z < (noiseVals[x]).length; z++) {
                 double n = noise.getNoise(x + originX, z + originZ);
                 noiseVals[x][z] = n;
-                max = Math.max(n, max);
-                min = Math.min(n, min);
-                if(colors)
-                    rgbVals[x][z] = colorCollection.get(noise, x + originX, z + originZ);
             }
         }
-        long time = System.nanoTime() - s;
-        double ms = time / 1000000.0D;
-        int i;
-        for(i = 0; i < noiseVals.length; i++) {
-            for(int z = 0; z < (noiseVals[i]).length; z++) {
-                if(colors) {
-                    image.setRGB(i, z, rgbVals[i][z] + -16777216);
+        long endTime = System.nanoTime();
+        double timeMs = (endTime - startTime) / 1000000.0D;
+
+        double max = Double.MIN_VALUE;
+        double min = Double.MAX_VALUE;
+        for(double[] noiseVal : noiseVals) { // do this separately to give more accurate measure of performance.
+            for(double v : noiseVal) {
+                max = FastMath.max(v, max);
+                min = FastMath.min(v, min);
+            }
+        }
+
+
+        int[] buckets = new int[sizeX];
+        for(int x = 0; x < noiseVals.length; x++) {
+            for(int z = 0; z < (noiseVals[x]).length; z++) {
+                if(color.get()) {
+                    image.setRGB(x, z, colorCollection.get(noise, x + originX, z + originZ) + -16777216);
                 } else {
-                    image.setRGB(i, z, buildRGBA(normal(noiseVals[i][z], 255.0D, min, max)));
+                    image.setRGB(x, z, buildRGBA(normal(noiseVals[x][z], 255.0D, min, max)));
                 }
-                buckets[normal(noiseVals[i][z], (sizeX - 1), min, max)] = buckets[normal(noiseVals[i][z], (sizeX - 1), min, max)] + 1;
+                buckets[normal(noiseVals[x][z], (sizeX - 1), min, max)] = buckets[normal(noiseVals[x][z], (sizeX - 1), min, max)] + 1;
             }
         }
+
         if(this.chunk.get()) {
-            for(i = 0; i < FastMath.floorDiv(image.getWidth(), 16); i++) {
-                for(int j = 0; j < image.getHeight(); ) {
-                    image.setRGB(i * 16, j, buildRGBA(0));
-                    j++;
+            for(int x = 0; x < FastMath.floorDiv(image.getWidth(), 16); x++) {
+                for(int y = 0; y < image.getHeight(); y++) {
+                    image.setRGB(x * 16, y, buildRGBA(0));
                 }
             }
             for(int y = 0; y < FastMath.floorDiv(image.getHeight(), 16); y++) {
-                for(int j = 0; j < image.getWidth(); ) {
-                    image.setRGB(j, y * 16, buildRGBA(0));
-                    j++;
+                for(int x = 0; x < image.getWidth(); x++) {
+                    image.setRGB(x, y * 16, buildRGBA(0));
                 }
             }
         }
-        this.statisticsPanel.setText("min: " + min + "\nmax: " + max + "\nseed: " + seed + "\ntime: " + ms + "ms");
+        this.statisticsPanel.setText("min: " + min + "\nmax: " + max + "\nseed: " + seed + "\ntime: " + timeMs + "ms");
         this.distributionPanel.update(buckets);
-        System.out.println("Rendered " + (sizeX * sizeY) + " points in " + ms + "ms.");
+        System.out.println("Rendered " + (sizeX * sizeY) + " points in " + timeMs + "ms.");
         return image;
     }
 }
