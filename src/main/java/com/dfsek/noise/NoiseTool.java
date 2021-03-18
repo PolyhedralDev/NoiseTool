@@ -10,6 +10,7 @@ import com.dfsek.noise.swing.actions.MutableBooleanAction;
 import com.dfsek.noise.swing.actions.OpenFileAction;
 import com.dfsek.noise.swing.actions.SaveAction;
 import com.dfsek.noise.swing.actions.SaveAsAction;
+import com.dfsek.noise.swing.actions.SaveRenderAsAction;
 import com.dfsek.noise.swing.actions.ShowFindDialogAction;
 import com.dfsek.noise.swing.actions.ShowReplaceDialogAction;
 import com.dfsek.noise.swing.actions.UpdateNoiseAction;
@@ -211,14 +212,17 @@ public final class NoiseTool extends JFrame implements SearchListener {
         Action open = new OpenFileAction(this);
         Action save = new SaveAction(this);
         Action saveAs = new SaveAsAction(this);
+        Action saveRender = new SaveRenderAsAction(this);
 
         open.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.CTRL_MASK));
         save.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK));
         saveAs.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK));
+        saveRender.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK | KeyEvent.ALT_MASK));
 
         menu.add(open);
         menu.add(save);
         menu.add(saveAs);
+        menu.add(saveRender);
 
 
         mb.add(menu);
