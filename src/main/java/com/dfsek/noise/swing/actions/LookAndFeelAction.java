@@ -24,15 +24,15 @@ public class LookAndFeelAction extends AbstractAction {
         try {
             UIManager.setLookAndFeel(info.getClassName());
             SwingUtilities.updateComponentTreeUI(noiseTool);
-            if (noiseTool.getFindDialog() != null) {
+            if(noiseTool.getFindDialog() != null) {
                 noiseTool.getFindDialog().updateUI();
                 noiseTool.getReplaceDialog().updateUI();
                 noiseTool.getNoise().update();
             }
             noiseTool.pack();
-        } catch (RuntimeException re) {
+        } catch(RuntimeException re) {
             throw re; // FindBugs
-        } catch (Exception ex) {
+        } catch(Exception ex) {
             ex.printStackTrace();
         }
     }

@@ -22,7 +22,7 @@ public class ShowReplaceDialogAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (noiseTool.getFindDialog().isVisible()) {
+        if(noiseTool.getFindDialog().isVisible()) {
             noiseTool.getFindDialog().setVisible(false);
         }
         noiseTool.getReplaceDialog().setVisible(true);

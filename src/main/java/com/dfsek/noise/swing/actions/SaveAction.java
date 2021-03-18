@@ -23,19 +23,19 @@ public class SaveAction extends AbstractAction {
 
         File file = noiseTool.getFileChooser().getSelectedFile();
 
-        if (file == null) {
+        if(file == null) {
             System.out.println("No file is selected.");
             return;
         }
 
         System.out.println("Saving to " + file.getAbsolutePath());
-        try (FileWriter writer = new FileWriter(file)) {
-            if (!file.exists()) {
+        try(FileWriter writer = new FileWriter(file)) {
+            if(!file.exists()) {
                 file.getParentFile().mkdirs();
                 file.createNewFile();
             }
             IOUtils.write(noiseTool.getTextArea().getText(), writer);
-        } catch (IOException e) {
+        } catch(IOException e) {
             e.printStackTrace();
         }
 

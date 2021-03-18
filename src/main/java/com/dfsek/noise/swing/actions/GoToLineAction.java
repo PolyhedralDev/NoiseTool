@@ -24,20 +24,20 @@ public class GoToLineAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (noiseTool.getFindDialog().isVisible()) {
+        if(noiseTool.getFindDialog().isVisible()) {
             noiseTool.getFindDialog().setVisible(false);
         }
-        if (noiseTool.getReplaceDialog().isVisible()) {
+        if(noiseTool.getReplaceDialog().isVisible()) {
             noiseTool.getReplaceDialog().setVisible(false);
         }
         GoToDialog dialog = new GoToDialog(noiseTool);
         dialog.setMaxLineNumberAllowed(noiseTool.getTextArea().getLineCount());
         dialog.setVisible(true);
         int line = dialog.getLineNumber();
-        if (line > 0) {
+        if(line > 0) {
             try {
                 noiseTool.getTextArea().setCaretPosition(noiseTool.getTextArea().getLineStartOffset(line - 1));
-            } catch (BadLocationException ble) { // Never happens
+            } catch(BadLocationException ble) { // Never happens
                 UIManager.getLookAndFeel().provideErrorFeedback(noiseTool.getFindDialog());
                 ble.printStackTrace();
             }

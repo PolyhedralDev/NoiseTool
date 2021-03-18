@@ -4,9 +4,8 @@ import com.dfsek.noise.swing.NoisePanel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
-public class UpdateNoiseAction  extends AbstractAction {
+public class UpdateNoiseAction extends AbstractAction {
     private final NoisePanel noisePanel;
 
     public UpdateNoiseAction(NoisePanel noisePanel) {

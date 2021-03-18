@@ -29,12 +29,12 @@ public class NoiseSettingsPanel extends JPanel {
         return ((Number) xOrigin.getValue()).doubleValue();
     }
 
-    public double getOriginZ() {
-        return ((Number) zOrigin.getValue()).doubleValue();
-    }
-
     public void setOriginX(double x) {
         xOrigin.setValue(x);
+    }
+
+    public double getOriginZ() {
+        return ((Number) zOrigin.getValue()).doubleValue();
     }
 
     public void setOriginZ(double z) {

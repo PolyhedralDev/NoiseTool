@@ -12,10 +12,17 @@ public class NoiseDistributionPanel extends JPanel {
         add(image);
     }
 
+    private static int buildRGBA(int in) {
+        return (255 << 24)
+                + (in << 16)
+                + (in << 8)
+                + in;
+    }
+
     public void update(int[] buckets) {
         try {
             image.setIcon(new ImageIcon(getImage(buckets)));
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
             image.setIcon(new TextIcon(this, "An error occurred. "));
         }
@@ -29,26 +36,19 @@ public class NoiseDistributionPanel extends JPanel {
         Graphics graphics = image.getGraphics();
 
         int highestBucket = Integer.MIN_VALUE;
-        for (int i : buckets) highestBucket = Math.max(highestBucket, i);
+        for(int i : buckets) highestBucket = Math.max(highestBucket, i);
 
         graphics.setColor(text);
         graphics.drawString("" + highestBucket, 0, -1 + 20);
 
-        for (int x = 0; x < sizeX; x++) {
-            for (int y = 0; y < ((double) buckets[x] / highestBucket) * ((double) sizeY); y++) {
+        for(int x = 0; x < sizeX; x++) {
+            for(int y = 0; y < ((double) buckets[x] / highestBucket) * ((double) sizeY); y++) {
                 image.setRGB(x, sizeY - y - 1, text.getRGB());
             }
         }
 
 
         return image;
-    }
-
-    private static int buildRGBA(int in) {
-        return (255 << 24)
-                + (in << 16)
-                + (in << 8)
-                + in;
     }
 
     public void error() {

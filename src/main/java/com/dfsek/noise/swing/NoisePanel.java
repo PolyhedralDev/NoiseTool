@@ -2,22 +2,22 @@ package com.dfsek.noise.swing;
 
 import com.dfsek.noise.config.ColorConfigTemplate;
 import com.dfsek.noise.config.NoiseConfigTemplate;
-import com.dfsek.tectonic.config.ConfigTemplate;
 import com.dfsek.tectonic.exception.ConfigException;
 import com.dfsek.tectonic.loading.ConfigLoader;
-import com.dfsek.tectonic.loading.TypeLoader;
-import com.dfsek.tectonic.loading.TypeRegistry;
 import com.dfsek.terra.api.math.noise.NoiseSampler;
 import com.dfsek.terra.api.util.collections.ProbabilityCollection;
 import com.dfsek.terra.api.util.mutable.MutableBoolean;
 import com.dfsek.terra.api.util.seeded.NoiseSeeded;
 import com.dfsek.terra.config.GenericLoaders;
 import com.dfsek.terra.config.fileloaders.FolderLoader;
-import com.dfsek.terra.config.fileloaders.Loader;
 import com.dfsek.terra.config.loaders.ProbabilityCollectionLoader;
 import com.dfsek.terra.config.loaders.config.BufferedImageLoader;
 import com.dfsek.terra.config.loaders.config.sampler.NoiseSamplerBuilderLoader;
 import com.dfsek.terra.registry.config.NoiseRegistry;
+import net.jafama.FastMath;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
+import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -26,12 +26,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import net.jafama.FastMath;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 public class NoisePanel extends JPanel {
     private final RSyntaxTextArea textArea;
@@ -62,12 +56,14 @@ public class NoisePanel extends JPanel {
             private volatile int myX;
 
             private volatile int myY;
+
             {
                 add(image);
                 addMouseListener(new MouseListener() {
 
                     @Override
-                    public void mouseClicked(MouseEvent e) { }
+                    public void mouseClicked(MouseEvent e) {
+                    }
 
                     @Override
                     public void mousePressed(MouseEvent e) {
@@ -89,10 +85,12 @@ public class NoisePanel extends JPanel {
                     }
 
                     @Override
-                    public void mouseEntered(MouseEvent e) { }
+                    public void mouseEntered(MouseEvent e) {
+                    }
 
                     @Override
-                    public void mouseExited(MouseEvent e) { }
+                    public void mouseExited(MouseEvent e) {
+                    }
 
                 });
                 addMouseMotionListener(new MouseMotionListener() {
@@ -106,18 +104,28 @@ public class NoisePanel extends JPanel {
                     }
 
                     @Override
-                    public void mouseMoved(MouseEvent e) { }
+                    public void mouseMoved(MouseEvent e) {
+                    }
 
                 });
             }
         });
     }
 
+    private static int normal(double in, double out, double min, double max) {
+        double range = max - min;
+        return (int) ((in - min) * out / range);
+    }
+
+    private static int buildRGBA(int in) {
+        return -16777216 + (in << 16) + (in << 8) + in;
+    }
+
     public void update() {
         try {
             this.render = getImage(this.settingsPanel.getSeed());
             this.image.setIcon(new ImageIcon(this.render));
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
             this.image.setIcon(new TextIcon(this, "An error occurred. "));
             this.statisticsPanel.setText("An error occurred.");
@@ -145,7 +153,7 @@ public class NoisePanel extends JPanel {
         File colorFile = new File("./color.yml");
         boolean colors = false;
         ColorConfigTemplate color = new ColorConfigTemplate();
-        if (colorFile.exists()) {
+        if(colorFile.exists()) {
             loader.load(color, new FileInputStream(colorFile));
             colors = color.enable();
         }
@@ -164,22 +172,22 @@ public class NoisePanel extends JPanel {
         double min = Double.MAX_VALUE;
         int[] buckets = new int[sizeX];
         long s = System.nanoTime();
-        for (int x = 0; x < noiseVals.length; x++) {
-            for (int z = 0; z < (noiseVals[x]).length; z++) {
+        for(int x = 0; x < noiseVals.length; x++) {
+            for(int z = 0; z < (noiseVals[x]).length; z++) {
                 double n = noise.getNoise(x + originX, z + originZ);
                 noiseVals[x][z] = n;
                 max = Math.max(n, max);
                 min = Math.min(n, min);
-                if (colors)
+                if(colors)
                     rgbVals[x][z] = colorCollection.get(noise, x + originX, z + originZ);
             }
         }
         long time = System.nanoTime() - s;
         double ms = time / 1000000.0D;
         int i;
-        for (i = 0; i < noiseVals.length; i++) {
-            for (int z = 0; z < (noiseVals[i]).length; z++) {
-                if (colors) {
+        for(i = 0; i < noiseVals.length; i++) {
+            for(int z = 0; z < (noiseVals[i]).length; z++) {
+                if(colors) {
                     image.setRGB(i, z, rgbVals[i][z] + -16777216);
                 } else {
                     image.setRGB(i, z, buildRGBA(normal(noiseVals[i][z], 255.0D, min, max)));
@@ -187,15 +195,15 @@ public class NoisePanel extends JPanel {
                 buckets[normal(noiseVals[i][z], (sizeX - 1), min, max)] = buckets[normal(noiseVals[i][z], (sizeX - 1), min, max)] + 1;
             }
         }
-        if (this.chunk.get()) {
-            for (i = 0; i < FastMath.floorDiv(image.getWidth(), 16); i++) {
-                for (int j = 0; j < image.getHeight(); ) {
+        if(this.chunk.get()) {
+            for(i = 0; i < FastMath.floorDiv(image.getWidth(), 16); i++) {
+                for(int j = 0; j < image.getHeight(); ) {
                     image.setRGB(i * 16, j, buildRGBA(0));
                     j++;
                 }
             }
-            for (int y = 0; y < FastMath.floorDiv(image.getHeight(), 16); y++) {
-                for (int j = 0; j < image.getWidth(); ) {
+            for(int y = 0; y < FastMath.floorDiv(image.getHeight(), 16); y++) {
+                for(int j = 0; j < image.getWidth(); ) {
                     image.setRGB(j, y * 16, buildRGBA(0));
                     j++;
                 }
@@ -205,14 +213,5 @@ public class NoisePanel extends JPanel {
         this.distributionPanel.update(buckets);
         System.out.println("Rendered " + (sizeX * sizeY) + " points in " + ms + "ms.");
         return image;
-    }
-
-    private static int normal(double in, double out, double min, double max) {
-        double range = max - min;
-        return (int)((in - min) * out / range);
-    }
-
-    private static int buildRGBA(int in) {
-        return -16777216 + (in << 16) + (in << 8) + in;
     }
 }

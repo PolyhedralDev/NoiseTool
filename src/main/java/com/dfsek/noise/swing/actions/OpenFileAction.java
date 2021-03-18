@@ -28,7 +28,7 @@ public class OpenFileAction extends AbstractAction {
             System.out.println("Opening " + file.getAbsolutePath());
             try {
                 noiseTool.getTextArea().setText(IOUtils.toString(new FileInputStream(file), Charset.defaultCharset()));
-            } catch (IOException e) {
+            } catch(IOException e) {
                 e.printStackTrace();
             }
         } else {

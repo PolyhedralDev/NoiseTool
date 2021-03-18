@@ -22,12 +22,12 @@ public class SwingUtils {
      * height is similarly determined for each row.
      * The parent is made just big enough to fit them all.
      *
-     * @param rows number of rows
-     * @param cols number of columns
+     * @param rows     number of rows
+     * @param cols     number of columns
      * @param initialX x location to start the grid at
      * @param initialY y location to start the grid at
-     * @param xPad x padding between cells
-     * @param yPad y padding between cells
+     * @param xPad     x padding between cells
+     * @param yPad     y padding between cells
      */
     public static void makeCompactGrid(Container parent,
                                        int rows, int cols,
@@ -35,22 +35,22 @@ public class SwingUtils {
                                        int xPad, int yPad) {
         SpringLayout layout;
         try {
-            layout = (SpringLayout)parent.getLayout();
-        } catch (ClassCastException exc) {
+            layout = (SpringLayout) parent.getLayout();
+        } catch(ClassCastException exc) {
             System.err.println("The first argument to makeCompactGrid must use SpringLayout.");
             return;
         }
 
         //Align all cells in each column and make them the same width.
         Spring x = Spring.constant(initialX);
-        for (int c = 0; c < cols; c++) {
+        for(int c = 0; c < cols; c++) {
             Spring width = Spring.constant(0);
-            for (int r = 0; r < rows; r++) {
+            for(int r = 0; r < rows; r++) {
                 width = Spring.max(width,
                         getConstraintsForCell(r, c, parent, cols).
                                 getWidth());
             }
-            for (int r = 0; r < rows; r++) {
+            for(int r = 0; r < rows; r++) {
                 SpringLayout.Constraints constraints =
                         getConstraintsForCell(r, c, parent, cols);
                 constraints.setX(x);
@@ -61,10 +61,10 @@ public class SwingUtils {
 
         //Align all cells in each row and make them the same height.
         Spring y = Spring.constant(initialY);
-        for (int r = 0; r < rows; r++) {
+        for(int r = 0; r < rows; r++) {
             Spring height = Spring.constant(35);
 
-            for (int c = 0; c < cols; c++) {
+            for(int c = 0; c < cols; c++) {
                 SpringLayout.Constraints constraints =
                         getConstraintsForCell(r, c, parent, cols);
                 constraints.setY(y);
