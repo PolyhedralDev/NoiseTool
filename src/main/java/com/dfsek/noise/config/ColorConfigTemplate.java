@@ -1,9 +1,9 @@
-package com.dfsek.noise;
+package com.dfsek.noise.config;
 
 import com.dfsek.tectonic.annotations.Default;
 import com.dfsek.tectonic.annotations.Value;
 import com.dfsek.tectonic.config.ConfigTemplate;
-import com.dfsek.terra.api.math.ProbabilityCollection;
+import com.dfsek.terra.api.util.collections.ProbabilityCollection;
 
 public class ColorConfigTemplate implements ConfigTemplate {
     @Value("colors")

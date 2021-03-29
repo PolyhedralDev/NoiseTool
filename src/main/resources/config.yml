@@ -1,7 +1,12 @@
-dimensions: 2
-sampler-type: NOISE
-type: OpenSimplex2
-frequency: 0.01
-fractal:
-  type: FBm
+type: "DOMAINWARP"
+amplitude: 10
+warp:
+  type: "OPENSIMPLEX2S"
+  frequency: 0.01
+function:
+  type: "FBM"
   octaves: 4
+  function:
+    type: "CELLULAR"
+    return: "CellValue"
+    frequency: 0.01
