@@ -1,57 +1,37 @@
+![](https://i.imgur.com/0CtCgvX.png)
+
 # Noise Tool
 
-A generic name for a generic program.
-
-This tool allows you to visualise noise. Specifically, you can visualise noise as defined by Terra configuration files.
-The tool can show you information about the noise, including:
+This tool allows you to visualise and edit Terra noise configurations. Features include:
 
 * 2D maps of the noise function itself
 * Minimum/Maximum values of the function
 * Plots of the distribution of noise values
 * Time taken to generate the noise
+* YAML editor with syntax highlighting and basic auto-completion.
+* Ability to load/save configurations.
+* Ability to save renders to images.
+* Ability to pan noise renders by dragging.
 
 # Using the tool
 
-To use the tool, simply download the latest release, and put it in a folder. Run the tool from the command line
-via `java -jar NoiseTool-VERSION.jar`. When you run the tool, a GUI will open showing a view of the noise, min/max
-values, the seed, and the time taken to generate it. The view is 1024x1024.
-
-When you run the tool it will create a configuration file, `config.yml` in the same directory. This config is identical
-to Terra noise configs.
-[here](https://github.com/PolyhedralDev/Terra/wiki/Noise-Options).
+To use the tool, simply download the latest release, and run it. A window will open up containing
+an editor on the left, and a render of the noise function on the right.
 
 ## Reloading the config
 
-This tool allows you to reload the config live. To do so, simply press `r`.
+This tool allows you to reload the config live. To do so, simply select `Noise > Render`, or press `F5`.
 
-## Randomizing seed
+## Setting the seed
 
-To randomize the seed, press `s`.
+To set the noise seed, go to the `Settings` panel on the right side of the application, and set the
+"Seed" spinner.
 
 ## Plotting distribution
 
-To plot the distribution of the noise function at the bottom of the window, press `d`.
+To view the noise distribution, see the "Distribution" panel on the right.
 
-## Colorizing
+## Loading/Saving configurations
 
-To colorize noise (useful for visualizing the actual distribution of things in probability collections), create a file
-in the same directory as the noise tool called `color.yml`. This file has 2 keys:
-
-* `enable` - Whether to pull colors from a probability collection rather than from noise values.
-* `colors` - A probability collection of colors. They are represented in a raw integer format. You may use hexadecimal
-  color notation by prefixing hex values with `0x`.
-
-Example `color.yml`:
-
- ```yaml
-colors:
-  0xff0000: 1
-  0x00ff00: 1
-  0x0000ff: 1
-  0xffffff: 1
-  0x000000: 1
-  0xffff00: 1
-  0x00ffff: 1
-  0xff00ff: 1
-enable: true
-```
+To load/Save configurations, use the `File` menu. Standard keyboard shortcuts (`Ctrl+O`, `Ctrl+S`, `Ctrl+Shift+S`)
+are available as well. To save noise renders to an image, select `File > Save Render As` or use `Ctrl+Alt+S`.
