@@ -1,6 +1,10 @@
 package com.dfsek.noise.swing;
 
+import com.dfsek.terra.api.util.mutable.MutableBoolean;
+
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -9,7 +13,9 @@ import java.util.Map;
 
 public class PosterizationPanel extends JScrollPane {
     private final Map<Integer, Integer> colors = new LinkedHashMap<>();
-    private final JPanel sections = new JPanel();
+    private final DefaultListModel<Section> defaultListModel = new DefaultListModel<>();
+    private final JList<Section> sections = new JList<>(defaultListModel);
+
     private final JColorChooser colorChooser = new JColorChooser();
 
     public PosterizationPanel() {
@@ -21,10 +27,17 @@ public class PosterizationPanel extends JScrollPane {
         content.add(new JSeparator());
         content.add(sections);
 
-        sections.setLayout(new BoxLayout(sections, BoxLayout.Y_AXIS));
+
         JButton add = new JButton("+");
 
-        add.addActionListener(e -> sections.add(new Section()));
+
+        add.addActionListener(e -> defaultListModel.addElement(new Section()));
+
+        sections.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            if(isSelected) value.select();
+            else value.unselect();
+            return value;
+        });
         content.add(add);
 
         setViewportView(content);
@@ -37,10 +50,18 @@ public class PosterizationPanel extends JScrollPane {
         public Section() {
             JButton delete = new JButton("Delete");
             delete.addActionListener(e -> sections.remove(this));
-            setBorder(new LineBorder(Color.BLACK, 2));
+
             add(new JLabel(createImageIcon(Color.BLUE, 20, 20)));
             add(weight);
             add(delete);
+        }
+
+        public void select() {
+            setBorder(new LineBorder(Color.BLACK, 2));
+        }
+
+        public void unselect() {
+            setBorder(new EmptyBorder(0,0,0,0));
         }
     }
 
