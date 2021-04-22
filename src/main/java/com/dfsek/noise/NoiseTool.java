@@ -3,6 +3,7 @@ package com.dfsek.noise;
 import com.dfsek.noise.swing.NoiseDistributionPanel;
 import com.dfsek.noise.swing.NoisePanel;
 import com.dfsek.noise.swing.NoiseSettingsPanel;
+import com.dfsek.noise.swing.PosterizationPanel;
 import com.dfsek.noise.swing.StatusBar;
 import com.dfsek.noise.swing.actions.GoToLineAction;
 import com.dfsek.noise.swing.actions.LookAndFeelAction;
@@ -95,6 +96,8 @@ public final class NoiseTool extends JFrame implements SearchListener {
 
         NoiseSettingsPanel settingsPanel = new NoiseSettingsPanel();
 
+        PosterizationPanel posterizationPanel = new PosterizationPanel();
+
         this.noise = new NoisePanel(textArea, statisticsPanel, distributionPanel, settingsPanel);
 
         JTabbedPane pane = new JTabbedPane();
@@ -105,6 +108,8 @@ public final class NoiseTool extends JFrame implements SearchListener {
         pane.addTab("Statistics", statisticsPanel);
 
         pane.addTab("Distribution", distributionPanel);
+
+        pane.addTab("Posterization", posterizationPanel);
 
         JTextArea sysout = new JTextArea();
         sysout.setEditable(false);
