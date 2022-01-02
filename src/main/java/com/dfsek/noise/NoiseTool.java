@@ -1,36 +1,24 @@
 package com.dfsek.noise;
 
+import com.dfsek.noise.platform.DummyPack;
+import com.dfsek.noise.platform.PlatformImpl;
 import com.dfsek.noise.swing.NoiseDistributionPanel;
 import com.dfsek.noise.swing.NoisePanel;
 import com.dfsek.noise.swing.NoiseSettingsPanel;
 import com.dfsek.noise.swing.StatusBar;
-import com.dfsek.noise.swing.actions.GoToLineAction;
-import com.dfsek.noise.swing.actions.LookAndFeelAction;
-import com.dfsek.noise.swing.actions.MutableBooleanAction;
-import com.dfsek.noise.swing.actions.OpenFileAction;
-import com.dfsek.noise.swing.actions.SaveAction;
-import com.dfsek.noise.swing.actions.SaveAsAction;
-import com.dfsek.noise.swing.actions.SaveRenderAsAction;
-import com.dfsek.noise.swing.actions.ShowFindDialogAction;
-import com.dfsek.noise.swing.actions.ShowReplaceDialogAction;
-import com.dfsek.noise.swing.actions.UpdateNoiseAction;
-import com.dfsek.terra.registry.config.NoiseRegistry;
+import com.dfsek.noise.swing.actions.*;
+import com.dfsek.tectonic.api.config.template.object.ObjectTemplate;
+import com.dfsek.tectonic.yaml.YamlConfiguration;
+import com.dfsek.terra.api.noise.NoiseSampler;
+import com.dfsek.terra.api.registry.Registry;
+import com.dfsek.terra.api.util.reflection.TypeKey;
 import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import org.apache.commons.io.IOUtils;
 import org.fife.rsta.ui.CollapsibleSectionPanel;
-import org.fife.rsta.ui.search.FindDialog;
-import org.fife.rsta.ui.search.FindToolBar;
-import org.fife.rsta.ui.search.ReplaceDialog;
-import org.fife.rsta.ui.search.ReplaceToolBar;
-import org.fife.rsta.ui.search.SearchEvent;
-import org.fife.rsta.ui.search.SearchListener;
-import org.fife.ui.autocomplete.AutoCompletion;
-import org.fife.ui.autocomplete.BasicCompletion;
-import org.fife.ui.autocomplete.CompletionProvider;
-import org.fife.ui.autocomplete.DefaultCompletionProvider;
-import org.fife.ui.autocomplete.LanguageAwareCompletionProvider;
+import org.fife.rsta.ui.search.*;
+import org.fife.ui.autocomplete.*;
 import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -47,6 +35,8 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 
 public final class NoiseTool extends JFrame implements SearchListener {
@@ -62,8 +52,11 @@ public final class NoiseTool extends JFrame implements SearchListener {
     private FindToolBar findToolBar;
     private ReplaceToolBar replaceToolBar;
 
+    private static final TypeKey<Supplier<ObjectTemplate<NoiseSampler>>> NOISE_REGISTRY_KEY = new TypeKey<>() {};
 
-    private NoiseTool() {
+
+    private NoiseTool() throws IOException {
+        String config = IOUtils.toString(Objects.requireNonNull(NoiseTool.class.getResourceAsStream("/config.yml")), StandardCharsets.UTF_8);
         initSearchDialogs();
 
         JPanel contentPane = new JPanel(new BorderLayout());
@@ -78,7 +71,10 @@ public final class NoiseTool extends JFrame implements SearchListener {
         textArea.setTabsEmulated(true);
         textArea.setTabSize(2);
 
-        CompletionProvider provider = createCompletionProvider(new NoiseRegistry()); //new LanguageAwareCompletionProvider(new DefaultCompletionProvider());
+        PlatformImpl platform = new PlatformImpl();
+        DummyPack pack = new DummyPack(platform, new YamlConfiguration(config, "Noise Config"));
+
+        CompletionProvider provider = createCompletionProvider(pack.getRegistry(NOISE_REGISTRY_KEY));
 
         AutoCompletion ac = new AutoCompletion(provider);
         ac.install(textArea);
@@ -95,7 +91,7 @@ public final class NoiseTool extends JFrame implements SearchListener {
 
         NoiseSettingsPanel settingsPanel = new NoiseSettingsPanel();
 
-        this.noise = new NoisePanel(textArea, statisticsPanel, distributionPanel, settingsPanel);
+        this.noise = new NoisePanel(textArea, statisticsPanel, distributionPanel, settingsPanel, platform);
 
         JTabbedPane pane = new JTabbedPane();
         pane.addTab("Render", noise);
@@ -127,11 +123,8 @@ public final class NoiseTool extends JFrame implements SearchListener {
         setJMenuBar(createMenuBar());
 
 
-        try {
-            textArea.setText(IOUtils.toString(NoiseTool.class.getResourceAsStream("/config.yml"), StandardCharsets.UTF_8));
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
+        textArea.setText(config);
+
 
 
         RTextScrollPane sp = new RTextScrollPane(textArea);
@@ -169,20 +162,24 @@ public final class NoiseTool extends JFrame implements SearchListener {
             } catch(Exception e) {
                 e.printStackTrace();
             }
-            new NoiseTool().setVisible(true);
+            try {
+                new NoiseTool().setVisible(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 
-    private CompletionProvider createCompletionProvider(NoiseRegistry registry) {
+    private CompletionProvider createCompletionProvider(Registry<Supplier<ObjectTemplate<NoiseSampler>>> registry) {
         DefaultCompletionProvider noiseTypeProvider = new DefaultCompletionProvider();
         noiseTypeProvider.setAutoActivationRules(true, null);
 
-        registry.keys().forEach(key -> noiseTypeProvider.addCompletion(new BasicCompletion(noiseTypeProvider, key, null, key + " noise type")));
+        registry.keys().forEach(key -> noiseTypeProvider.addCompletion(new BasicCompletion(noiseTypeProvider, key.toString(), null, key + " noise type")));
 
         DefaultCompletionProvider basicProvider = new DefaultCompletionProvider();
         basicProvider.setAutoActivationRules(true, null);
 
-        registry.keys().forEach(key -> basicProvider.addCompletion(new BasicCompletion(basicProvider, key, null, key + " noise type")));
+        registry.keys().forEach(key -> basicProvider.addCompletion(new BasicCompletion(basicProvider, key.toString(), null, key + " noise type")));
         basicProvider.addCompletion(new BasicCompletion(basicProvider, "type", null, "Sets the noise type for this sampler."));
         basicProvider.addCompletion(new BasicCompletion(basicProvider, "frequency", null, "Sets the frequency for this sampler."));
 
