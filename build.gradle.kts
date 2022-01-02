@@ -20,6 +20,8 @@ dependencies {
     implementation("commons-io:commons-io:2.11.0")
     implementation("com.google.guava:guava:31.0.1-jre")
 
+    implementation("com.dfsek.tectonic", "yaml", "4.2.0")
+
 
     implementation("com.fifesoft:rstaui:3.1.3")
     implementation("com.fifesoft:rsyntaxtextarea:3.1.4")
