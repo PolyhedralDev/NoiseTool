@@ -21,6 +21,7 @@ dependencies {
     implementation("com.google.guava:guava:31.0.1-jre")
 
     implementation("com.dfsek.tectonic", "yaml", "4.2.0")
+    implementation("ch.qos.logback:logback-classic:1.2.10")
 
 
     implementation("com.fifesoft:rstaui:3.1.3")
