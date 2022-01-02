@@ -17,6 +17,7 @@ dependencies {
     testImplementation("junit", "junit", "4.12")
     implementation("com.dfsek.terra:base:6.0.0-BETA+f7d53c9db")
     compileOnly("org.jetbrains:annotations:23.0.0")
+    implementation("commons-io:commons-io:2.11.0")
 
 
     implementation("com.fifesoft:rstaui:3.1.3")
