@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     testImplementation("junit", "junit", "4.12")
-    implementation("com.dfsek.terra:base:6.0.0-BETA+f7d53c9db")
+    implementation("com.dfsek.terra:base:6.0.0-BETA+3fd5aaf56")
     compileOnly("org.jetbrains:annotations:23.0.0")
     implementation("commons-io:commons-io:2.11.0")
     implementation("com.google.guava:guava:31.0.1-jre")
