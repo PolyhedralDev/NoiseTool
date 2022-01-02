@@ -7,26 +7,22 @@ group = "com.dfsek"
 version = "1.0.0"
 
 repositories {
-    maven { url = uri("https://repo.codemc.org/repository/maven-public") }
     mavenCentral()
+    maven {
+        url = uri("https://repo.codemc.io/repository/maven-public/")
+    }
 }
 
 dependencies {
-    testCompile("junit", "junit", "4.12")
-    implementation("com.dfsek:Tectonic:1.2.3")
-    implementation("com.dfsek.terra.common:common:5.1.3-BETA+f396e0e5")
-    implementation("org.yaml:snakeyaml:1.27")
-    implementation("com.dfsek:Paralithic:0.3.2")
-    implementation("commons-io:commons-io:2.8.0")
-    implementation("net.jafama:jafama:2.3.2")
-    implementation("org.ow2.asm:asm:9.0")
-
-    implementation("com.fifesoft:rstaui:3.1.1")
-    implementation("com.fifesoft:rsyntaxtextarea:3.1.2")
-    implementation("com.fifesoft:autocomplete:3.1.1")
+    testImplementation("junit", "junit", "4.12")
+    implementation("com.dfsek.terra:base:6.0.0-BETA+f7d53c9db")
 
 
-    implementation("com.formdev:flatlaf:1.0")
+    implementation("com.fifesoft:rstaui:3.1.3")
+    implementation("com.fifesoft:rsyntaxtextarea:3.1.4")
+    implementation("com.fifesoft:autocomplete:3.1.3")
+
+    implementation("com.formdev:flatlaf:1.6.5")
 }
 
 
@@ -34,4 +30,9 @@ val jar by tasks.getting(Jar::class) {
     manifest {
         attributes["Main-Class"] = "com.dfsek.noise.NoiseTool"
     }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
