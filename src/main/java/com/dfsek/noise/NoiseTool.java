@@ -139,7 +139,7 @@ public final class NoiseTool extends JFrame implements SearchListener {
         setTitle("Noise Tool");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        FlatDarculaLaf.install();
+        FlatDarculaLaf.setup();
 
         SwingUtilities.updateComponentTreeUI(NoiseTool.this);
         if(findDialog != null) {

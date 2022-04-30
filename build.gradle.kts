@@ -18,17 +18,17 @@ dependencies {
     implementation("com.dfsek.terra:base:6.0.0-BETA+42fb3642f")
     compileOnly("org.jetbrains:annotations:23.0.0")
     implementation("commons-io:commons-io:2.11.0")
-    implementation("com.google.guava:guava:31.0.1-jre")
+    implementation("com.google.guava:guava:31.1-jre")
 
     implementation("com.dfsek.tectonic", "yaml", "4.2.0")
-    implementation("ch.qos.logback:logback-classic:1.2.10")
+    implementation("ch.qos.logback:logback-classic:1.2.11")
 
 
-    implementation("com.fifesoft:rstaui:3.1.3")
-    implementation("com.fifesoft:rsyntaxtextarea:3.1.4")
-    implementation("com.fifesoft:autocomplete:3.1.3")
+    implementation("com.fifesoft:rstaui:3.2.0")
+    implementation("com.fifesoft:rsyntaxtextarea:3.2.0")
+    implementation("com.fifesoft:autocomplete:3.2.0")
 
-    implementation("com.formdev:flatlaf:1.6.5")
+    implementation("com.formdev:flatlaf:2.1")
 }
 
 
