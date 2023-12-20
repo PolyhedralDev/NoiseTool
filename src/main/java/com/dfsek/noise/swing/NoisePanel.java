@@ -6,6 +6,7 @@ import com.dfsek.terra.api.Platform;
 import com.dfsek.terra.api.noise.NoiseSampler;
 import com.dfsek.terra.api.util.collection.ProbabilityCollection;
 import com.dfsek.terra.api.util.mutable.MutableBoolean;
+import net.worldsynth.glpreview.heightmap.Heightmap3DGLPreviewBufferedGL;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.*;
@@ -18,6 +19,8 @@ public class NoisePanel extends JPanel {
     private final RSyntaxTextArea textArea;
 
     private final JLabel image;
+
+    private final Heightmap3DGLPreviewBufferedGL noise3d;
 
     private final JTextArea statisticsPanel;
 
@@ -34,8 +37,9 @@ public class NoisePanel extends JPanel {
     private ProbabilityCollection<Integer> colorCollection;
     private final Platform platform;
 
-    public NoisePanel(RSyntaxTextArea textArea, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel, final NoiseSettingsPanel settingsPanel, Platform platform) {
+    public NoisePanel(RSyntaxTextArea textArea, Heightmap3DGLPreviewBufferedGL noise3d, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel, final NoiseSettingsPanel settingsPanel, Platform platform) {
         this.textArea = textArea;
+        this.noise3d = noise3d;
         this.statisticsPanel = statisticsPanel;
         this.distributionPanel = distributionPanel;
         this.settingsPanel = settingsPanel;
@@ -133,6 +137,10 @@ public class NoisePanel extends JPanel {
         try {
             this.render = getImage(this.settingsPanel.getSeed());
             this.image.setIcon(new ImageIcon(this.render));
+
+            double[][] noiseVals = getNoiseVals(this.settingsPanel.getSeed());
+            this.noise3d.setHeightmap(noiseVals, Math.max(noiseVals.length, noiseVals[0].length), 256);
+
             this.error.set(false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -162,6 +170,22 @@ public class NoisePanel extends JPanel {
 
     public MutableBoolean getChunk() {
         return this.chunk;
+    }
+
+    private double[][] getNoiseVals(long seed) {
+        int sizeX = getWidth();
+        int sizeY = getHeight();
+        double originX = this.settingsPanel.getOriginX();
+        double originZ = this.settingsPanel.getOriginZ();
+
+        double[][] noiseVals = new double[sizeX][sizeY];
+        for (int x = 0; x < noiseVals.length; x++) {
+            for (int z = 0; z < (noiseVals[x]).length; z++) {
+                double n = noiseSeeded.noise(seed, x + originX, z + originZ);
+                noiseVals[x][z] = n;
+            }
+        }
+        return noiseVals;
     }
 
     private BufferedImage getImage(long seed) {

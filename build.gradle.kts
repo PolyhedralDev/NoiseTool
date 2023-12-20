@@ -16,6 +16,11 @@ repositories {
         name = "Jitpack"
         url = uri("https://jitpack.io")
     }
+
+    // JOGL 2.4.0-rc4
+    maven {
+        url = uri("https://maven.jzy3d.org/releases")
+    }
 }
 
 dependencies {
@@ -34,6 +39,21 @@ dependencies {
     implementation("com.fifesoft:autocomplete:3.3.1")
 
     implementation("com.formdev:flatlaf:3.2.5")
+
+    implementation("org.jogamp.jogl:jogl-all:v2.4.0-rc4")
+    implementation("org.jogamp.gluegen:gluegen-rt:v2.4.0-rc4")
+
+    runtimeOnly("org.jogamp.jogl:jogl-all-natives-linux-amd64:v2.4.0-rc4")
+    runtimeOnly("org.jogamp.jogl:jogl-all-natives-linux-i586:v2.4.0-rc4")
+    runtimeOnly("org.jogamp.jogl:jogl-all-natives-macosx-universal:v2.4.0-rc4")
+    runtimeOnly("org.jogamp.jogl:jogl-all-natives-windows-amd64:v2.4.0-rc4")
+    runtimeOnly("org.jogamp.jogl:jogl-all-natives-windows-i586:v2.4.0-rc4")
+
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt-natives-linux-amd64:v2.4.0-rc4")
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt-natives-linux-i586:v2.4.0-rc4")
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt-natives-macosx-universal:v2.4.0-rc4")
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt-natives-windows-amd64:v2.4.0-rc4")
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt-natives-windows-i586:v2.4.0-rc4")
 }
 
 
