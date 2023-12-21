@@ -16,7 +16,6 @@ import com.jogamp.opengl.awt.GLJPanel;
 import net.worldsynth.glpreview.Commons;
 import net.worldsynth.glpreview.buffered.Shader.ShaderType;
 import net.worldsynth.glpreview.model.AbstractModel;
-import net.worldsynth.util.math.MathHelperScalar;
 
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseEvent;
@@ -279,7 +278,7 @@ public class BufferedGLPanel extends GLJPanel implements GLEventListener, MouseM
             display();
         } else if(SwingUtilities.isMiddleMouseButton(e)) {
             yLookatHeight += (y - lastMouseY) * -zoom * 0.2f;
-            yLookatHeight = MathHelperScalar.clamp(yLookatHeight, minYLookatHeight, maxYLookatHeight);
+            yLookatHeight = Math.min(Math.max(yLookatHeight, minYLookatHeight), maxYLookatHeight);
             display();
         } else if(SwingUtilities.isRightMouseButton(e)) {
             float lightDist = 5000;

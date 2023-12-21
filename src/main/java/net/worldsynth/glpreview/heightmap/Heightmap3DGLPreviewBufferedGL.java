@@ -9,8 +9,6 @@ package net.worldsynth.glpreview.heightmap;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import net.worldsynth.glpreview.buffered.BufferedGLPanel;
-import net.worldsynth.util.Arrays;
-import net.worldsynth.util.math.MathHelperScalar;
 
 
 public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
@@ -49,7 +47,17 @@ public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
     }
 
     public void setHeightmap(double[][] heightmap, double size, float normalizedHeight) {
-        setHeightmap(Arrays.cast2f(heightmap), size, normalizedHeight);
+        setHeightmap(cast2f(heightmap), size, normalizedHeight);
+    }
+
+    private float[][] cast2f(double[][] array2d) {
+        float[][] array2f = new float[array2d.length][array2d[0].length];
+        for(int i = 0, width = array2d.length; i < width; i++) {
+            for(int j = 0, length = array2d[0].length; j < length; j++) {
+                array2f[i][j] = (float) array2d[i][j];
+            }
+        }
+        return array2f;
     }
 
     public void setColorscale(float[][] colorscale) {
@@ -71,7 +79,7 @@ public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
     }
 
     private float[] heightToColor(float height, float normalizedHeight) {
-        height = MathHelperScalar.clamp(height, 0.0f, normalizedHeight) / normalizedHeight;
+        height = Math.min(Math.max(height, 0.0f), normalizedHeight) / normalizedHeight;
 
         float[] lowRange = colorscale[0];
         float[] highRange = colorscale[1];
