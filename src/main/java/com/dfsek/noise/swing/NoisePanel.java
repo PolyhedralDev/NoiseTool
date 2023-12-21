@@ -139,7 +139,7 @@ public class NoisePanel extends JPanel {
             this.image.setIcon(new ImageIcon(this.render));
 
             double[][] noiseVals = getNoiseVals(this.settingsPanel.getSeed());
-            this.noise3d.setHeightmap(noiseVals, Math.max(noiseVals.length, noiseVals[0].length), 256);
+            this.noise3d.setHeightmap(noiseVals);
 
             this.error.set(false);
         } catch (Exception e) {

@@ -14,13 +14,16 @@ import net.worldsynth.glpreview.buffered.BufferedGLPanel;
 public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
     private static final long serialVersionUID = -1895542307473079689L;
 
+    /**
+     * Color scale. Entries are {elevation, r, g, b}.
+     */
     private float[][] colorscale = {
-        { 0, 0, 0, 1 },
-        { 0.2f, 1.0f, 1.0f, 0.0f },
-        { 0.5f, 0.0f, 1.0f, 0.0f },
-        { 0.7f, 0.75f, 0.56f, 0.2f },
-        { 0.8f, 0.5f, 0.5f, 0.5f },
-        { 1, 1, 1, 1 }
+        { 0.0f, 0.0f, 0.0f, 1.0f },
+        { 64.0f, 1.0f, 1.0f, 0.0f },
+        { 128.0f, 0.0f, 1.0f, 0.0f },
+        { 192.0f, 0.75f, 0.56f, 0.2f },
+        { 256.0f, 0.5f, 0.5f, 0.5f },
+        { 320.0f, 1.0f, 1.0f, 1.0f }
     };
 
     private HeightmapModel heightmapModel;
@@ -31,14 +34,14 @@ public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
         setRequestedGLCapabilities(glcapabilities);
     }
 
-    public void setHeightmap(float[][] heightmap, double size, float normalizedHeight) {
+    public void setHeightmap(float[][] heightmap) {
         //Create colormap from heightmap according to the colorscale
-        float[][][] colormap = colormapFromHeightmap(heightmap, normalizedHeight);
+        float[][][] colormap = colormapFromHeightmap(heightmap);
 
-        heightmapModel = new HeightmapModel(heightmap, colormap, size);
+        heightmapModel = new HeightmapModel(heightmap, colormap, Math.max(heightmap.length, heightmap[0].length));
 
-        minYLookatHeight = -normalizedHeight;
-        maxYLookatHeight = normalizedHeight;
+        minYLookatHeight = -64;
+        maxYLookatHeight = 320;
 
         startNewModel();
         loadModel(heightmapModel);
@@ -46,8 +49,8 @@ public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
         display();
     }
 
-    public void setHeightmap(double[][] heightmap, double size, float normalizedHeight) {
-        setHeightmap(cast2f(heightmap), size, normalizedHeight);
+    public void setHeightmap(double[][] heightmap) {
+        setHeightmap(cast2f(heightmap));
     }
 
     private float[][] cast2f(double[][] array2d) {
@@ -64,22 +67,29 @@ public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
         this.colorscale = colorscale;
     }
 
-    private float[][][] colormapFromHeightmap(float[][] heightmap, float normalizedHeight) {
+    public void setLookAtHeightSpan(float minLookAtHeight, float maxLookAtHeight) {
+        minYLookatHeight = minLookAtHeight;
+        maxYLookatHeight = maxLookAtHeight;
+    }
+
+    private float[][][] colormapFromHeightmap(float[][] heightmap) {
         int width = heightmap.length;
         int length = heightmap[0].length;
         float[][][] coloromap = new float[width][length][3];
 
         for(int x = 0; x < width; x++) {
             for(int z = 0; z < length; z++) {
-                coloromap[x][z] = heightToColor(heightmap[x][z], normalizedHeight);
+                coloromap[x][z] = heightToColor(heightmap[x][z]);
             }
         }
 
         return coloromap;
     }
 
-    private float[] heightToColor(float height, float normalizedHeight) {
-        height = Math.min(Math.max(height, 0.0f), normalizedHeight) / normalizedHeight;
+    private float[] heightToColor(float height) {
+        float colorscaleMin = colorscale[0][0];
+        float colorscaleMax = colorscale[colorscale.length-1][0];
+        height = Math.min(Math.max(height, colorscaleMin), colorscaleMax);
 
         float[] lowRange = colorscale[0];
         float[] highRange = colorscale[1];

@@ -22,11 +22,11 @@ public class Blockspace3DGLPreviewBufferedGL extends BufferedGLPanel {
         setRequestedGLCapabilities(glcapabilities);
     }
 
-    public void setBlockspace(boolean[][][] blockspace, float normalizedHeight) {
+    public void setBlockspace(boolean[][][] blockspace) {
         voxelModel = new VoxelModel(blockspace);
 
-        minYLookatHeight = -normalizedHeight;
-        maxYLookatHeight = normalizedHeight;
+        minYLookatHeight = -64;
+        maxYLookatHeight = 320;
 
         startNewModel();
         if(voxelModel.getPrimitivesCount() > 0) {
@@ -34,5 +34,10 @@ public class Blockspace3DGLPreviewBufferedGL extends BufferedGLPanel {
         }
         endNewModel();
         display();
+    }
+
+    public void setLookAtHeightSpan(float minLookAtHeight, float maxLookAtHeight) {
+        minYLookatHeight = minLookAtHeight;
+        maxYLookatHeight = maxLookAtHeight;
     }
 }
