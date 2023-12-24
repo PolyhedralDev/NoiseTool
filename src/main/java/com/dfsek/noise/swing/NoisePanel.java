@@ -146,6 +146,7 @@ public class NoisePanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
             this.image.setIcon(new TextIcon(this, "An error occurred. "));
+            this.noise3d.clearHeightmap();
             this.statisticsPanel.setText("An error occurred.");
             this.distributionPanel.error();
         }
@@ -160,6 +161,7 @@ public class NoisePanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
             this.image.setIcon(new TextIcon(this, "An error occurred. "));
+            this.noise3d.clearHeightmap();
             this.statisticsPanel.setText("An error occurred.");
             this.distributionPanel.error();
         }

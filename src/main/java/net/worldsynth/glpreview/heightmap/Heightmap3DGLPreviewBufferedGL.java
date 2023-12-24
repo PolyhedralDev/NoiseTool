@@ -34,6 +34,12 @@ public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
         setRequestedGLCapabilities(glcapabilities);
     }
 
+    public void clearHeightmap() {
+        startNewModel();
+        endNewModel();
+        display();
+    }
+
     public void setHeightmap(float[][] heightmap) {
         //Create colormap from heightmap according to the colorscale
         float[][][] colormap = colormapFromHeightmap(heightmap);
