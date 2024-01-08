@@ -16,6 +16,10 @@ repositories {
         name = "Jitpack"
         url = uri("https://jitpack.io")
     }
+    maven {
+        name = "JogAmp"
+        url = uri("https://jogamp.org/deployment/maven/")
+    }
 }
 
 dependencies {
@@ -34,6 +38,16 @@ dependencies {
     implementation("com.fifesoft:autocomplete:3.3.1")
 
     implementation("com.formdev:flatlaf:3.2.5")
+
+    implementation("org.jogamp.jogl:jogl-all:2.4.0")
+    runtimeOnly("org.jogamp.jogl:jogl-all:2.4.0:natives-linux-amd64")
+    runtimeOnly("org.jogamp.jogl:jogl-all:2.4.0:natives-macosx-universal")
+    runtimeOnly("org.jogamp.jogl:jogl-all:2.4.0:natives-windows-amd64")
+
+    implementation("org.jogamp.gluegen:gluegen-rt:2.4.0")
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt:2.4.0:natives-linux-amd64")
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt:2.4.0:natives-macosx-universal")
+    runtimeOnly("org.jogamp.gluegen:gluegen-rt:2.4.0:natives-windows-amd64")
 }
 
 

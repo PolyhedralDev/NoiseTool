@@ -6,6 +6,8 @@ import com.dfsek.terra.api.Platform;
 import com.dfsek.terra.api.noise.NoiseSampler;
 import com.dfsek.terra.api.util.collection.ProbabilityCollection;
 import com.dfsek.terra.api.util.mutable.MutableBoolean;
+import net.worldsynth.glpreview.heightmap.Heightmap3DGLPreviewBufferedGL;
+import net.worldsynth.glpreview.voxel.Blockspace3DGLPreviewBufferedGL;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.*;
@@ -18,6 +20,9 @@ public class NoisePanel extends JPanel {
     private final RSyntaxTextArea textArea;
 
     private final JLabel image;
+
+    private final Heightmap3DGLPreviewBufferedGL noise3d;
+    private final Blockspace3DGLPreviewBufferedGL noise3dVox;
 
     private final JTextArea statisticsPanel;
 
@@ -34,8 +39,10 @@ public class NoisePanel extends JPanel {
     private ProbabilityCollection<Integer> colorCollection;
     private final Platform platform;
 
-    public NoisePanel(RSyntaxTextArea textArea, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel, final NoiseSettingsPanel settingsPanel, Platform platform) {
+    public NoisePanel(RSyntaxTextArea textArea, Heightmap3DGLPreviewBufferedGL noise3d, Blockspace3DGLPreviewBufferedGL noise3dVox, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel, final NoiseSettingsPanel settingsPanel, Platform platform) {
         this.textArea = textArea;
+        this.noise3d = noise3d;
+        this.noise3dVox = noise3dVox;
         this.statisticsPanel = statisticsPanel;
         this.distributionPanel = distributionPanel;
         this.settingsPanel = settingsPanel;
@@ -133,10 +140,24 @@ public class NoisePanel extends JPanel {
         try {
             this.render = getImage(this.settingsPanel.getSeed());
             this.image.setIcon(new ImageIcon(this.render));
+
+            double[][] noiseVals = getNoiseVals(this.settingsPanel.getSeed());
+            this.noise3d.setColorScale(settingsPanel.getColorScale());
+            this.noise3d.setHeightmap(noiseVals);
+
+            if (this.settingsPanel.getVoxelResolution() > 0) {
+                boolean[][][] noiseValsVox = getNoiseVals3d(this.settingsPanel.getSeed());
+                this.noise3dVox.setBlockspace(noiseValsVox);
+            } else {
+                this.noise3dVox.clearBlockspace();
+            }
+
             this.error.set(false);
         } catch (Exception e) {
             e.printStackTrace();
             this.image.setIcon(new TextIcon(this, "An error occurred. "));
+            this.noise3d.clearHeightmap();
+            this.noise3dVox.clearBlockspace();
             this.statisticsPanel.setText("An error occurred.");
             this.distributionPanel.error();
         }
@@ -151,6 +172,8 @@ public class NoisePanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
             this.image.setIcon(new TextIcon(this, "An error occurred. "));
+            this.noise3d.clearHeightmap();
+            this.noise3dVox.clearBlockspace();
             this.statisticsPanel.setText("An error occurred.");
             this.distributionPanel.error();
         }
@@ -162,6 +185,39 @@ public class NoisePanel extends JPanel {
 
     public MutableBoolean getChunk() {
         return this.chunk;
+    }
+
+    private double[][] getNoiseVals(long seed) {
+        int sizeX = getWidth();
+        int sizeZ = getHeight();
+        double originX = this.settingsPanel.getOriginX();
+        double originZ = this.settingsPanel.getOriginZ();
+
+        double[][] noiseVals = new double[sizeX][sizeZ];
+        for (int x = 0; x < noiseVals.length; x++) {
+            for (int z = 0; z < (noiseVals[x]).length; z++) {
+                double n = noiseSeeded.noise(seed, x + originX, z + originZ);
+                noiseVals[x][z] = n;
+            }
+        }
+        return noiseVals;
+    }
+
+    private boolean[][][] getNoiseVals3d(long seed) {
+        double originX = this.settingsPanel.getOriginX();
+        double originZ = this.settingsPanel.getOriginZ();
+
+        int sampleRes = this.settingsPanel.getVoxelResolution();
+        boolean[][][] noiseVals = new boolean[sampleRes][sampleRes][sampleRes];
+        for (int x = 0; x < noiseVals.length; x++) {
+            for (int y = 0; y < noiseVals[x].length; y++) {
+                for(int z = 0; z < (noiseVals[x][y]).length; z++) {
+                    double n = noiseSeeded.noise(seed, x + originX, y, z + originZ);
+                    noiseVals[x][y][z] = n > 0;
+                }
+            }
+        }
+        return noiseVals;
     }
 
     private BufferedImage getImage(long seed) {
@@ -201,7 +257,7 @@ public class NoisePanel extends JPanel {
                 if (colorCollection != null) {
                     image.setRGB(x, z, colorCollection.get(noiseSeeded, x + originX, z + originZ, seed) - 16777216);
                 } else {
-                    image.setRGB(x, z, buildRGBA(normal(noiseVals[x][z], 255.0D, min, max)));
+                    image.setRGB(x, z, this.settingsPanel.getColorScale().valueToIRgb(noiseVals[x][z], min, max));
                 }
                 buckets[normal(noiseVals[x][z], (sizeX - 1), min, max)] = buckets[normal(noiseVals[x][z], (sizeX - 1), min, max)] + 1;
             }
