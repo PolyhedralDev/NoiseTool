@@ -4,7 +4,7 @@
 
 This tool allows you to visualise and edit Terra noise configurations. Features include:
 
-* 2D maps of the noise function itself
+* 2D, 3D and Voxel rendering of the noise function itself
 * Minimum/Maximum values of the function
 * Plots of the distribution of noise values
 * Time taken to generate the noise
