@@ -17,6 +17,7 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import net.worldsynth.glpreview.heightmap.Heightmap3DGLPreviewBufferedGL;
 import net.worldsynth.glpreview.util.GLUtil;
+import net.worldsynth.glpreview.voxel.Blockspace3DGLPreviewBufferedGL;
 import org.apache.commons.io.IOUtils;
 import org.fife.rsta.ui.CollapsibleSectionPanel;
 import org.fife.rsta.ui.search.*;
@@ -95,13 +96,15 @@ public final class NoiseTool extends JFrame implements SearchListener {
 
         GLUtil.logGLProfiles();
         Heightmap3DGLPreviewBufferedGL noise3d = new Heightmap3DGLPreviewBufferedGL();
+        Blockspace3DGLPreviewBufferedGL noise3dVox = new Blockspace3DGLPreviewBufferedGL();
 
-        this.noise = new NoisePanel(textArea, noise3d, statisticsPanel, distributionPanel, settingsPanel, platform);
+        this.noise = new NoisePanel(textArea, noise3d, noise3dVox, statisticsPanel, distributionPanel, settingsPanel, platform);
 
         JTabbedPane pane = new JTabbedPane();
         pane.addTab("Render", noise);
 
         pane.addTab("Render 3D", noise3d);
+        pane.addTab("Render Voxel", noise3dVox);
 
         pane.addTab("Settings", settingsPanel);
 

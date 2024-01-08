@@ -7,6 +7,7 @@ import com.dfsek.terra.api.noise.NoiseSampler;
 import com.dfsek.terra.api.util.collection.ProbabilityCollection;
 import com.dfsek.terra.api.util.mutable.MutableBoolean;
 import net.worldsynth.glpreview.heightmap.Heightmap3DGLPreviewBufferedGL;
+import net.worldsynth.glpreview.voxel.Blockspace3DGLPreviewBufferedGL;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import javax.swing.*;
@@ -21,6 +22,7 @@ public class NoisePanel extends JPanel {
     private final JLabel image;
 
     private final Heightmap3DGLPreviewBufferedGL noise3d;
+    private final Blockspace3DGLPreviewBufferedGL noise3dVox;
 
     private final JTextArea statisticsPanel;
 
@@ -37,9 +39,10 @@ public class NoisePanel extends JPanel {
     private ProbabilityCollection<Integer> colorCollection;
     private final Platform platform;
 
-    public NoisePanel(RSyntaxTextArea textArea, Heightmap3DGLPreviewBufferedGL noise3d, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel, final NoiseSettingsPanel settingsPanel, Platform platform) {
+    public NoisePanel(RSyntaxTextArea textArea, Heightmap3DGLPreviewBufferedGL noise3d, Blockspace3DGLPreviewBufferedGL noise3dVox, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel, final NoiseSettingsPanel settingsPanel, Platform platform) {
         this.textArea = textArea;
         this.noise3d = noise3d;
+        this.noise3dVox = noise3dVox;
         this.statisticsPanel = statisticsPanel;
         this.distributionPanel = distributionPanel;
         this.settingsPanel = settingsPanel;
@@ -142,11 +145,15 @@ public class NoisePanel extends JPanel {
             this.noise3d.setColorScale(settingsPanel.getColorScale());
             this.noise3d.setHeightmap(noiseVals);
 
+            boolean[][][] noiseValsVox = getNoiseVals3d(this.settingsPanel.getSeed());
+            this.noise3dVox.setBlockspace(noiseValsVox);
+
             this.error.set(false);
         } catch (Exception e) {
             e.printStackTrace();
             this.image.setIcon(new TextIcon(this, "An error occurred. "));
             this.noise3d.clearHeightmap();
+            this.noise3dVox.clearBlockspace();
             this.statisticsPanel.setText("An error occurred.");
             this.distributionPanel.error();
         }
@@ -162,6 +169,7 @@ public class NoisePanel extends JPanel {
             e.printStackTrace();
             this.image.setIcon(new TextIcon(this, "An error occurred. "));
             this.noise3d.clearHeightmap();
+            this.noise3dVox.clearBlockspace();
             this.statisticsPanel.setText("An error occurred.");
             this.distributionPanel.error();
         }
@@ -177,15 +185,34 @@ public class NoisePanel extends JPanel {
 
     private double[][] getNoiseVals(long seed) {
         int sizeX = getWidth();
-        int sizeY = getHeight();
+        int sizeZ = getHeight();
         double originX = this.settingsPanel.getOriginX();
         double originZ = this.settingsPanel.getOriginZ();
 
-        double[][] noiseVals = new double[sizeX][sizeY];
+        double[][] noiseVals = new double[sizeX][sizeZ];
         for (int x = 0; x < noiseVals.length; x++) {
             for (int z = 0; z < (noiseVals[x]).length; z++) {
                 double n = noiseSeeded.noise(seed, x + originX, z + originZ);
                 noiseVals[x][z] = n;
+            }
+        }
+        return noiseVals;
+    }
+
+    private boolean[][][] getNoiseVals3d(long seed) {
+        int sizeX = getWidth();
+        int sizeZ = getHeight();
+        double originX = this.settingsPanel.getOriginX();
+        double originZ = this.settingsPanel.getOriginZ();
+
+        //boolean[][][] noiseVals = new boolean[sizeX][64][sizeZ];
+        boolean[][][] noiseVals = new boolean[256][256][256];
+        for (int x = 0; x < noiseVals.length; x++) {
+            for (int y = 0; y < noiseVals[x].length; y++) {
+                for(int z = 0; z < (noiseVals[x][y]).length; z++) {
+                    double n = noiseSeeded.noise(seed, x + originX, y, z + originZ);
+                    noiseVals[x][y][z] = n > 0;
+                }
             }
         }
         return noiseVals;

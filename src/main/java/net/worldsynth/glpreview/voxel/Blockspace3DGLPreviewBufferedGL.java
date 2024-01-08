@@ -22,6 +22,12 @@ public class Blockspace3DGLPreviewBufferedGL extends BufferedGLPanel {
         setRequestedGLCapabilities(glcapabilities);
     }
 
+    public void clearBlockspace() {
+        startNewModel();
+        endNewModel();
+        display();
+    }
+
     public void setBlockspace(boolean[][][] blockspace) {
         voxelModel = new VoxelModel(blockspace);
 
