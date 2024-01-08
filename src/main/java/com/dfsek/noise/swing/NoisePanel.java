@@ -139,7 +139,7 @@ public class NoisePanel extends JPanel {
             this.image.setIcon(new ImageIcon(this.render));
 
             double[][] noiseVals = getNoiseVals(this.settingsPanel.getSeed());
-            this.noise3d.setColorscale(settingsPanel.getColorScale().getScale());
+            this.noise3d.setColorScale(settingsPanel.getColorScale());
             this.noise3d.setHeightmap(noiseVals);
 
             this.error.set(false);
@@ -228,7 +228,7 @@ public class NoisePanel extends JPanel {
                 if (colorCollection != null) {
                     image.setRGB(x, z, colorCollection.get(noiseSeeded, x + originX, z + originZ, seed) - 16777216);
                 } else {
-                    image.setRGB(x, z, buildRGBA(normal(noiseVals[x][z], 255.0D, min, max)));
+                    image.setRGB(x, z, this.settingsPanel.getColorScale().valueToIRgb(noiseVals[x][z], min, max));
                 }
                 buckets[normal(noiseVals[x][z], (sizeX - 1), min, max)] = buckets[normal(noiseVals[x][z], (sizeX - 1), min, max)] + 1;
             }

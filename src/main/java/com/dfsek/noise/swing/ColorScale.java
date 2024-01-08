@@ -73,6 +73,41 @@ public class ColorScale {
         return text.toString();
     }
 
+    public float[] valueToFRgb(float value, float min, float max) {
+        float colorScaleMin = scale[0][0];
+        float colorScaleMax = scale[scale.length - 1][0];
+
+        value = Math.min(Math.max(value, colorScaleMin), colorScaleMax);
+
+        float[] lowRange = scale[0];
+        float[] highRange = scale[1];
+        for(int i = 1; i < scale.length; i++) {
+            if(value <= scale[i][0] && value >= scale[i - 1][0]) {
+                lowRange = scale[i - 1];
+                highRange = scale[i];
+            }
+        }
+        float[] color = new float[3];
+        float a = (value - lowRange[0]) / (highRange[0] - lowRange[0]);
+        for(int j = 0; j < 3; j++) {
+            color[j] = lowRange[j + 1] * (1 - a) + highRange[j + 1] * a;
+        }
+        return color;
+    }
+
+    public int valueToIRgb(float value, float min, float max) {
+        float[] fRgb = valueToFRgb(value, min, max);
+        int r = (int) (fRgb[0] * 255);
+        int g = (int) (fRgb[1] * 255);
+        int b = (int) (fRgb[2] * 255);
+        int rgb = -16777216 + (r << 16) + (g << 8) + b;
+        return rgb;
+    }
+
+    public int valueToIRgb(double value, double min, double max) {
+        return valueToIRgb((float) value, (float) min, (float) max);
+    }
+
     @Override
     public String toString() {
         return getName();

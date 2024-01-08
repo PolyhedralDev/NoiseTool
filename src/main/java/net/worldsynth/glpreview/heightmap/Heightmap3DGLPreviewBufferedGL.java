@@ -6,6 +6,7 @@
 
 package net.worldsynth.glpreview.heightmap;
 
+import com.dfsek.noise.swing.ColorScale;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import net.worldsynth.glpreview.buffered.BufferedGLPanel;
@@ -15,16 +16,9 @@ public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
     private static final long serialVersionUID = -1895542307473079689L;
 
     /**
-     * Color scale. Entries are {elevation, r, g, b}.
+     * Color scale.
      */
-    private float[][] colorscale = {
-        { 0.0f, 0.0f, 0.0f, 1.0f },
-        { 64.0f, 1.0f, 1.0f, 0.0f },
-        { 128.0f, 0.0f, 1.0f, 0.0f },
-        { 192.0f, 0.75f, 0.56f, 0.2f },
-        { 256.0f, 0.5f, 0.5f, 0.5f },
-        { 320.0f, 1.0f, 1.0f, 1.0f }
-    };
+    private ColorScale colorscale = ColorScale.GRAYSCALE_0_1;
 
     private HeightmapModel heightmapModel;
 
@@ -69,7 +63,7 @@ public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
         return array2f;
     }
 
-    public void setColorscale(float[][] colorscale) {
+    public void setColorScale(ColorScale colorscale) {
         this.colorscale = colorscale;
     }
 
@@ -83,34 +77,21 @@ public class Heightmap3DGLPreviewBufferedGL extends BufferedGLPanel {
         int length = heightmap[0].length;
         float[][][] coloromap = new float[width][length][3];
 
+        float max = Float.NEGATIVE_INFINITY;
+        float min = Float.POSITIVE_INFINITY;
         for(int x = 0; x < width; x++) {
             for(int z = 0; z < length; z++) {
-                coloromap[x][z] = heightToColor(heightmap[x][z]);
+                max = Math.max(heightmap[x][z], max);
+                min = Math.min(heightmap[x][z], min);
+            }
+        }
+
+        for(int x = 0; x < width; x++) {
+            for(int z = 0; z < length; z++) {
+                coloromap[x][z] = colorscale.valueToFRgb(heightmap[x][z], min, max);
             }
         }
 
         return coloromap;
-    }
-
-    private float[] heightToColor(float height) {
-        float colorscaleMin = colorscale[0][0];
-        float colorscaleMax = colorscale[colorscale.length-1][0];
-        height = Math.min(Math.max(height, colorscaleMin), colorscaleMax);
-
-        float[] lowRange = colorscale[0];
-        float[] highRange = colorscale[1];
-        for(int i = 1; i < colorscale.length; i++) {
-            if(height <= colorscale[i][0] && height >= colorscale[i - 1][0]) {
-                lowRange = colorscale[i - 1];
-                highRange = colorscale[i];
-            }
-        }
-        float[] colorspace = new float[3];
-        float a = (height - lowRange[0]) / (highRange[0] - lowRange[0]);
-        for(int j = 0; j < 3; j++) {
-            colorspace[j] = lowRange[j + 1] * (1 - a) + highRange[j + 1] * a;
-        }
-        float[] color = { colorspace[0], colorspace[1], colorspace[2] };
-        return color;
     }
 }
