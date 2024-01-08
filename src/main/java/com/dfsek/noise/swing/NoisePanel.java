@@ -145,8 +145,12 @@ public class NoisePanel extends JPanel {
             this.noise3d.setColorScale(settingsPanel.getColorScale());
             this.noise3d.setHeightmap(noiseVals);
 
-            boolean[][][] noiseValsVox = getNoiseVals3d(this.settingsPanel.getSeed());
-            this.noise3dVox.setBlockspace(noiseValsVox);
+            if (this.settingsPanel.getVoxelResolution() > 0) {
+                boolean[][][] noiseValsVox = getNoiseVals3d(this.settingsPanel.getSeed());
+                this.noise3dVox.setBlockspace(noiseValsVox);
+            } else {
+                this.noise3dVox.clearBlockspace();
+            }
 
             this.error.set(false);
         } catch (Exception e) {
@@ -200,13 +204,11 @@ public class NoisePanel extends JPanel {
     }
 
     private boolean[][][] getNoiseVals3d(long seed) {
-        int sizeX = getWidth();
-        int sizeZ = getHeight();
         double originX = this.settingsPanel.getOriginX();
         double originZ = this.settingsPanel.getOriginZ();
 
-        //boolean[][][] noiseVals = new boolean[sizeX][64][sizeZ];
-        boolean[][][] noiseVals = new boolean[256][256][256];
+        int sampleRes = this.settingsPanel.getVoxelResolution();
+        boolean[][][] noiseVals = new boolean[sampleRes][sampleRes][sampleRes];
         for (int x = 0; x < noiseVals.length; x++) {
             for (int y = 0; y < noiseVals[x].length; y++) {
                 for(int z = 0; z < (noiseVals[x][y]).length; z++) {
