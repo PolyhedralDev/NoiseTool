@@ -15,8 +15,26 @@ This tool allows you to visualise and edit Terra noise configurations. Features 
 
 # Using the tool
 
-To use the tool, simply download the latest release, and run it. A window will open up containing
-an editor on the left, and a render of the noise function on the right.
+## Setup
+
+To use the tool, simply download the latest release and run it. 
+An `addons` folder will automatically be created for you.
+The Noise Tool does not include any addons by default, so this folder will only have an empty `bootstrap` folder in it.
+
+Copy the `bootstrap` folder and the `config-noise-function` addon from your Terra installation (found in `Terra/addons`) to the Noise Tool’s `addon` folder.
+Verify that the file structure in the folder containing the Noise Tool matches this:
+
+```
+├── addons
+│   ├── bootstrap
+│   │   ├── Terra-api-addon-loader-<version>-all.jar
+│   │   └── Terra-manifest-addon-loader-<version>-all.jar
+│   └── Terra-config-noise-function-<version>-all.jar
+└── NoiseTool-<version>-all.jar
+```
+
+Once you have verified your file structure is correct, rerun the application.
+A window will open up containing an editor on the left, and a render of the noise function on the right.
 
 ## Reloading the config
 
