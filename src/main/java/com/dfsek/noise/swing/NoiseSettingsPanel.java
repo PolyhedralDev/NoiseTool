@@ -17,6 +17,8 @@ public class NoiseSettingsPanel extends JPanel {
 
     // Voxel preview settings
     private final JSpinner voxelResolution = new JSpinner(new SpinnerNumberModel(128, 0, Integer.MAX_VALUE, 1));
+    private final JSpinner voxelBottomY = new JSpinner(new SpinnerNumberModel(-64, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
+    private final JSpinner voxelTopY = new JSpinner(new SpinnerNumberModel(319, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
 
     // Color scale presets
     private final ColorScale customColorScalePreset = new ColorScale("Custom", false, (float[][]) null);
@@ -47,6 +49,11 @@ public class NoiseSettingsPanel extends JPanel {
 
         add(new JLabel("Voxel preview resolution: "));
         add(voxelResolution);
+
+        add(new JLabel("Voxel preview bottom Y: "));
+        add(voxelBottomY);
+        add(new JLabel("Voxel preview top Y: "));
+        add(voxelTopY);
 
         add(new JLabel("Color scale preset: "));
         colorScalePresets.setSelectedItem(ColorScale.GRAYSCALE_NORMALIZED);
@@ -104,7 +111,7 @@ public class NoiseSettingsPanel extends JPanel {
             }
         });
 
-        SwingUtils.makeCompactGrid(this, 7, 2, 10, 10, 10, 10);
+        SwingUtils.makeCompactGrid(this, 9, 2, 10, 10, 10, 10);
     }
 
     public int getSeed() {
@@ -129,6 +136,14 @@ public class NoiseSettingsPanel extends JPanel {
 
     public int getVoxelResolution() {
         return ((Number) voxelResolution.getValue()).intValue();
+    }
+
+    public int getVoxelBottomY() {
+        return ((Number) voxelBottomY.getValue()).intValue();
+    }
+
+    public int getVoxelTopY() {
+        return ((Number) voxelTopY.getValue()).intValue();
     }
 
     public ColorScale getColorScale() {

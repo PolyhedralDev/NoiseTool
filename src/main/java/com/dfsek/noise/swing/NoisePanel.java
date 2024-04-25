@@ -208,11 +208,14 @@ public class NoisePanel extends JPanel {
         double originZ = this.settingsPanel.getOriginZ();
 
         int sampleRes = this.settingsPanel.getVoxelResolution();
-        boolean[][][] noiseVals = new boolean[sampleRes][sampleRes][sampleRes];
+        int sampleYMin = this.settingsPanel.getVoxelBottomY();
+        int sampleYMax = this.settingsPanel.getVoxelTopY();
+
+        boolean[][][] noiseVals = new boolean[sampleRes][sampleYMax - sampleYMin][sampleRes];
         for (int x = 0; x < noiseVals.length; x++) {
             for (int y = 0; y < noiseVals[x].length; y++) {
                 for(int z = 0; z < (noiseVals[x][y]).length; z++) {
-                    double n = noiseSeeded.noise(seed, x + originX, y, z + originZ);
+                    double n = noiseSeeded.noise(seed, x + originX, y + sampleYMin, z + originZ);
                     noiseVals[x][y][z] = n > 0;
                 }
             }
