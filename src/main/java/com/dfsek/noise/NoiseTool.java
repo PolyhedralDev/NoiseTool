@@ -114,7 +114,7 @@ public final class NoiseTool extends JFrame implements SearchListener {
         Heightmap3DGLPreviewBufferedGL noise3d = new Heightmap3DGLPreviewBufferedGL();
         Blockspace3DGLPreviewBufferedGL noise3dVox = new Blockspace3DGLPreviewBufferedGL();
 
-        this.noise = new NoisePanel(textArea, noise3d, noise3dVox, statisticsPanel, distributionPanel, settingsPanel, platform);
+        this.noise = new NoisePanel(textArea, noise3d, noise3dVox, statisticsPanel, distributionPanel, settingsPanel, platform, statusBar);
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Render", noise);

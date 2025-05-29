@@ -39,7 +39,7 @@ public class NoisePanel extends JPanel {
     private ProbabilityCollection<Integer> colorCollection;
     private final Platform platform;
 
-    public NoisePanel(RSyntaxTextArea textArea, Heightmap3DGLPreviewBufferedGL noise3d, Blockspace3DGLPreviewBufferedGL noise3dVox, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel, final NoiseSettingsPanel settingsPanel, Platform platform) {
+    public NoisePanel(RSyntaxTextArea textArea, Heightmap3DGLPreviewBufferedGL noise3d, Blockspace3DGLPreviewBufferedGL noise3dVox, JTextArea statisticsPanel, NoiseDistributionPanel distributionPanel, final NoiseSettingsPanel settingsPanel, Platform platform, StatusBar statusBar) {
         this.textArea = textArea;
         this.noise3d = noise3d;
         this.noise3dVox = noise3dVox;
@@ -100,9 +100,11 @@ public class NoisePanel extends JPanel {
 
                     @Override
                     public void mouseExited(MouseEvent e) {
+                        statusBar.clearCoordinates();
                     }
 
                 });
+
                 addMouseMotionListener(new MouseMotionListener() {
 
                     @Override
@@ -118,8 +120,8 @@ public class NoisePanel extends JPanel {
 
                     @Override
                     public void mouseMoved(MouseEvent e) {
+                        statusBar.setCoordinates((int) (e.getX() + settingsPanel.getOriginX()), (int) (e.getY() + settingsPanel.getOriginZ()));
                     }
-
                 });
             }
         });
