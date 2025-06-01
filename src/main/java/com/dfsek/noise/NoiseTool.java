@@ -62,10 +62,16 @@ public final class NoiseTool extends JFrame implements SearchListener {
         String config = IOUtils.toString(Objects.requireNonNull(NoiseTool.class.getResourceAsStream("/config.yml")), StandardCharsets.UTF_8);
         initSearchDialogs();
 
-        JPanel contentPane = new JPanel(new BorderLayout());
-
-        GridLayout layout = new GridLayout(1, 2);
+        // Use a border layout as the root layout
+        BorderLayout layout = new BorderLayout();
         setLayout(layout);
+
+        // Status bar at the bottom of the window
+        statusBar = new StatusBar();
+        add(statusBar, BorderLayout.SOUTH);
+
+        // Text area and error strip to the right of the text area
+        JPanel textPanel = new JPanel(new BorderLayout());
 
         textArea = new RSyntaxTextArea(35, 45);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_YAML);
@@ -74,6 +80,16 @@ public final class NoiseTool extends JFrame implements SearchListener {
         textArea.setTabsEmulated(true);
         textArea.setTabSize(2);
 
+        textArea.setText(config);
+        RTextScrollPane sp = new RTextScrollPane(textArea);
+        csp = new CollapsibleSectionPanel();
+        csp.add(sp);
+        textPanel.add(csp, BorderLayout.CENTER);
+
+        ErrorStrip errorStrip = new ErrorStrip(textArea);
+        textPanel.add(errorStrip, BorderLayout.LINE_END);
+
+        // Nose panels and other stuff at the right side
         PlatformImpl platform = new PlatformImpl();
         DummyPack pack = new DummyPack(platform, new YamlConfiguration(config, "Noise Config"));
 
@@ -98,19 +114,19 @@ public final class NoiseTool extends JFrame implements SearchListener {
         Heightmap3DGLPreviewBufferedGL noise3d = new Heightmap3DGLPreviewBufferedGL();
         Blockspace3DGLPreviewBufferedGL noise3dVox = new Blockspace3DGLPreviewBufferedGL();
 
-        this.noise = new NoisePanel(textArea, noise3d, noise3dVox, statisticsPanel, distributionPanel, settingsPanel, platform);
+        this.noise = new NoisePanel(textArea, noise3d, noise3dVox, statisticsPanel, distributionPanel, settingsPanel, platform, statusBar);
 
-        JTabbedPane pane = new JTabbedPane();
-        pane.addTab("Render", noise);
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Render", noise);
 
-        pane.addTab("Render 3D", noise3d);
-        pane.addTab("Render Voxel", noise3dVox);
+        tabbedPane.addTab("Render 3D", noise3d);
+        tabbedPane.addTab("Render Voxel", noise3dVox);
 
-        pane.addTab("Settings", settingsPanel);
+        tabbedPane.addTab("Settings", settingsPanel);
 
-        pane.addTab("Statistics", statisticsPanel);
+        tabbedPane.addTab("Statistics", statisticsPanel);
 
-        pane.addTab("Distribution", distributionPanel);
+        tabbedPane.addTab("Distribution", distributionPanel);
 
         JTextArea sysout = new JTextArea();
         sysout.setEditable(false);
@@ -118,33 +134,23 @@ public final class NoiseTool extends JFrame implements SearchListener {
         System.setOut(new PrintStream(new TextAreaOutputStream(sysout)));
         System.setErr(new PrintStream(new TextAreaOutputStream(sysout)));
 
-        pane.addTab("Console", new JScrollPane(sysout));
+        tabbedPane.addTab("Console", new JScrollPane(sysout));
 
-        pane.setSelectedIndex(0);
+        tabbedPane.setSelectedIndex(0);
 
-        pane.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 10));
+        tabbedPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 
-        add(contentPane);
-        add(pane);
+        GridLayout gridLayout = new GridLayout(1, 2);
+        JPanel contentPanel = new JPanel(gridLayout);
 
-        csp = new CollapsibleSectionPanel();
-        contentPane.add(csp);
+        add(contentPanel, BorderLayout.CENTER);
+
+        contentPanel.add(textPanel);
+        contentPanel.add(tabbedPane);
+
 
         setJMenuBar(createMenuBar());
 
-
-        textArea.setText(config);
-
-
-
-        RTextScrollPane sp = new RTextScrollPane(textArea);
-        csp.add(sp);
-
-        ErrorStrip errorStrip = new ErrorStrip(textArea);
-        contentPane.add(errorStrip, BorderLayout.LINE_END);
-
-        statusBar = new StatusBar();
-        contentPane.add(statusBar, BorderLayout.SOUTH);
 
         setTitle("Noise Tool");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
