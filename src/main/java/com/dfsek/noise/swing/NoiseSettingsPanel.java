@@ -15,6 +15,8 @@ public class NoiseSettingsPanel extends JPanel {
     private final JSpinner xOrigin = new JSpinner(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
     private final JSpinner zOrigin = new JSpinner(new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
 
+    private final JCheckBox useLetExpressions = new JCheckBox();
+
     // Voxel preview settings
     private final JSpinner voxelResolution = new JSpinner(new SpinnerNumberModel(128, 0, Integer.MAX_VALUE, 1));
     private final JSpinner voxelBottomY = new JSpinner(new SpinnerNumberModel(-64, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
@@ -46,6 +48,9 @@ public class NoiseSettingsPanel extends JPanel {
         add(xOrigin);
         add(new JLabel("Z Origin: "));
         add(zOrigin);
+
+        add(new JLabel("Use Let Expressions: "));
+        add(useLetExpressions);
 
         add(new JLabel("Voxel preview resolution: "));
         add(voxelResolution);
@@ -111,8 +116,10 @@ public class NoiseSettingsPanel extends JPanel {
             }
         });
 
-        SwingUtils.makeCompactGrid(this, 9, 2, 10, 10, 10, 10);
+        SwingUtils.makeCompactGrid(this, 10, 2, 10, 10, 10, 10);
+
     }
+
 
     public int getSeed() {
         return ((Number) seedSpinner.getValue()).intValue();
@@ -132,6 +139,10 @@ public class NoiseSettingsPanel extends JPanel {
 
     public void setOriginZ(double z) {
         zOrigin.setValue(z);
+    }
+
+    public boolean isUseLetExpressions() {
+        return useLetExpressions.isSelected();
     }
 
     public int getVoxelResolution() {

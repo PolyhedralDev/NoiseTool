@@ -20,6 +20,8 @@ package com.dfsek.noise.platform;
 import ca.solostudios.strata.Versions;
 import ca.solostudios.strata.version.Version;
 import ca.solostudios.strata.version.VersionRange;
+import com.dfsek.paralithic.eval.parser.Parser;
+import com.dfsek.paralithic.eval.parser.Parser.ParseOptions;
 import com.dfsek.tectonic.api.TypeRegistry;
 import com.dfsek.tectonic.api.config.Configuration;
 import com.dfsek.tectonic.api.config.template.annotations.Value;
@@ -86,8 +88,11 @@ public class DummyPack implements ConfigPack {
 
     private final NoiseSampler noiseSampler;
 
-    public DummyPack(Platform platform, Configuration noise) {
+    private final boolean useLetExpressions;
+
+    public DummyPack(Platform platform, Configuration noise, boolean useLetExpressions) {
         this.loader = new FolderLoader(new File(".").toPath());
+        this.useLetExpressions = useLetExpressions;
 
         register(selfLoader);
         platform.register(selfLoader);
@@ -216,6 +221,11 @@ public class DummyPack implements ConfigPack {
     @Override
     public Version getVersion() {
         return Versions.getVersion(1, 0, 0);
+    }
+
+    @Override
+    public ParseOptions getExpressionParseOptions() {
+        return new ParseOptions(useLetExpressions);
     }
 
     @SuppressWarnings("unchecked,rawtypes")

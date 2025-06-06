@@ -168,7 +168,7 @@ public class NoisePanel extends JPanel {
     public void reload() {
         this.error.set(true);
         try {
-            DummyPack pack = new DummyPack(platform, new YamlConfiguration(this.textArea.getText(), "Noise Config"));
+            DummyPack pack = new DummyPack(platform, new YamlConfiguration(this.textArea.getText(), "Noise Config"), this.settingsPanel.isUseLetExpressions());
             this.noiseSeeded = pack.getNoiseSampler();
             this.error.set(false);
         } catch (Exception e) {

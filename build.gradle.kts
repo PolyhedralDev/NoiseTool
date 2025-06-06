@@ -23,21 +23,22 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.11.2")
-    implementation("com.dfsek.terra:base:6.5.0-BETA+c374c2d5e")
-    compileOnly("org.jetbrains:annotations:26.0.0")
-    implementation("commons-io:commons-io:2.17.0")
-    implementation("com.google.guava:guava:33.3.1-jre")
+    testImplementation("org.junit.jupiter", "junit-jupiter", "5.13.0")
+    testRuntimeOnly("org.junit.platform", "junit-platform-launcher")
+    implementation("com.dfsek.terra:base:6.6.2-BETA+af9fb211a")
+    compileOnly("org.jetbrains:annotations:26.0.2")
+    implementation("commons-io:commons-io:2.19.0")
+    implementation("com.google.guava:guava:33.4.8-jre")
 
     implementation("com.dfsek.tectonic", "yaml", "4.2.1")
-    implementation("ch.qos.logback:logback-classic:1.5.8")
+    implementation("ch.qos.logback:logback-classic:1.5.18")
 
 
     implementation("com.fifesoft:rstaui:3.3.1")
     implementation("com.fifesoft:rsyntaxtextarea:3.5.1")
     implementation("com.fifesoft:autocomplete:3.3.1")
 
-    implementation("com.formdev:flatlaf:3.5.1")
+    implementation("com.formdev:flatlaf:3.6")
 
     implementation("org.jogamp.jogl:jogl-all:2.5.0")
     runtimeOnly("org.jogamp.jogl:jogl-all:2.5.0:natives-linux-amd64")

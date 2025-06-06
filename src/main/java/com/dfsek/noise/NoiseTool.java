@@ -89,9 +89,11 @@ public final class NoiseTool extends JFrame implements SearchListener {
         ErrorStrip errorStrip = new ErrorStrip(textArea);
         textPanel.add(errorStrip, BorderLayout.LINE_END);
 
+        NoiseSettingsPanel settingsPanel = new NoiseSettingsPanel();
+
         // Nose panels and other stuff at the right side
         PlatformImpl platform = new PlatformImpl();
-        DummyPack pack = new DummyPack(platform, new YamlConfiguration(config, "Noise Config"));
+        DummyPack pack = new DummyPack(platform, new YamlConfiguration(config, "Noise Config"), settingsPanel.isUseLetExpressions());
 
         CompletionProvider provider = createCompletionProvider(pack.getRegistry(NOISE_REGISTRY_KEY));
 
@@ -107,8 +109,6 @@ public final class NoiseTool extends JFrame implements SearchListener {
         statisticsPanel.setEditable(false);
 
         NoiseDistributionPanel distributionPanel = new NoiseDistributionPanel();
-
-        NoiseSettingsPanel settingsPanel = new NoiseSettingsPanel();
 
         GLUtil.logGLProfiles();
         Heightmap3DGLPreviewBufferedGL noise3d = new Heightmap3DGLPreviewBufferedGL();
