@@ -7,16 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4.2.1
+      - uses: actions/checkout@v4.2.2
       - name: Set up JDK 21
-        uses: actions/setup-java@v4.4.0
+        uses: actions/setup-java@v4.7.1
         with:
           java-version: '21'
           distribution: 'temurin'
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
 
-      - uses: burrunan/gradle-cache-action@v1.22
+      - uses: burrunan/gradle-cache-action@v3.0.1
         name: Build NoiseTool
         with:
           # Specifies arguments for Gradle execution
@@ -37,7 +37,7 @@ jobs:
             kotlin.parallel.tasks.in.project=true
 
       - name: Release
-        uses: softprops/action-gh-release@v2.0.8
+        uses: softprops/action-gh-release@v2.2.2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
